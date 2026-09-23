@@ -44,13 +44,14 @@ make_stop_input() {
     '{transcript_path:$t, stop_hook_active:$a}'
 }
 
-@test "block を返されたらそのまま stdout へ出す" {
+@test "block を返されたら reason へ別セッション案内を追記して stdout へ出す" {
   write_mock_gate '{"decision":"block","reason":"だめだに"}'
 
   run_hook "$SCRIPT_PATH" <<< "$(make_stop_input "$TRANSCRIPT")"
   [ "$status" -eq 0 ]
   [ "$(jq -r '.decision' <<< "$output")" = "block" ]
-  [ "$(jq -r '.reason' <<< "$output")" = "だめだに" ]
+  [[ "$(jq -r '.reason' <<< "$output")" == *"だめだに"* ]]
+  [[ "$(jq -r '.reason' <<< "$output")" == *"別セッション"* ]]
 }
 
 @test "指摘が無ければ何も出さない" {
