@@ -153,6 +153,10 @@ xargs writing-gate scan --format json < ./tmp/mdlist.txt \
 足したルールは、textlint-check の config と writing-gate を持つリポジトリでコミットする｡
 writing-gate の `rules.json` を変えたら再ビルドが要る｡埋め込みなので、ビルドしないと反映されない｡
 
+そのリポジトリが今の cwd と違うときは、そのリポジトリを cwd にした別セッションを立てて作業する｡
+`git -C` や `cd` で書き込み系の git を向ける代用はしない｡`cd` は cwd の字面が合わず sandbox 内に
+落ち、`-C` 前置は照合から外れるため、guard hook が拒む｡手動 worktree での代用もしない｡
+
 ## 棚卸し
 
 ルールは増える一方なので、たまに見る｡
