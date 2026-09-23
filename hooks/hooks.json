@@ -1,0 +1,16 @@
+{
+  "description": "セッションを閉じるときに、編集した markdown を writing-gate で点検する",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/stop-writing-gate.sh\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
