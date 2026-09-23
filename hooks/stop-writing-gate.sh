@@ -57,5 +57,12 @@ if [ "$(printf '%s' "$GATE_OUT" | jq -r '.decision // ""')" != "block" ]; then
   exit 0
 fi
 
+# ルールファイル (prh-*.yml, writing-gate の rules.json) を持つリポジトリが今の cwd と
+# 違う場合がある。その場でルールを直そうとして git 書き込みを guard hook に拒まれる
+# (cd は cwd の字面が合わず sandbox 内に落ち、-C 前置は照合から外れる) ため、
+# ここで別セッションへの引き継ぎを案内する。
+HANDOFF_NOTE='ルールファイルを持つリポジトリが今の cwd と違うときは、そのリポジトリを cwd にした別セッションを立てて直す (git -C や cd での代用は guard hook が拒む)｡'
+GATE_OUT=$(printf '%s' "$GATE_OUT" | jq -c --arg note "$HANDOFF_NOTE" '.reason = (.reason // "") + "\n\n" + $note')
+
 printf '%s\n' "$GATE_OUT"
 exit 0
