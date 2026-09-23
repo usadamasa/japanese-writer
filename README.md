@@ -76,6 +76,24 @@ proofread は汎用の機械点検と文章規範だけを持つ｡書き手ご�
 同梱の textlint config は、句読点を半角の「｡ ､」へ autofix する｡
 コード (インラインとブロック) の中は書き換えない｡
 
+## 開発
+
+plugin を使うだけなら「前提」節のツールで足りる｡このリポジトリで開発するときは､加えて次を用意する｡
+
+- [aqua](https://aquaproj.github.io/)｡task・golangci-lint・shellcheck・pinact・jv の版を `aqua.yaml` で固定している｡
+  `aqua i -l` で shim を張り､`$(aqua root-dir)/bin` を PATH に通す
+- [bats-core](https://github.com/bats-core/bats-core) (`task test` が使う)
+- Claude Code CLI (`task validate` が `claude plugin validate` を呼ぶ)
+
+CI と同じ確認は task で手元でも通せる｡
+
+| コマンド | 内容 |
+| ---- | ---- |
+| `task build` | `bin/writing-gate` をビルドする |
+| `task test` | ビルドしてから Go のテストと bats を実行する |
+| `task lint` | golangci-lint と shellcheck を実行する |
+| `task validate` | `claude plugin validate --strict` と､JSON / YAML が宣言した schema での検証を実行する |
+
 ## ライセンス
 
 MIT
