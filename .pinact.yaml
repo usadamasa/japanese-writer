@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/pinact/refs/heads/main/json-schema/pinact.json
+# pinact - https://github.com/suzuki-shunsuke/pinact
+version: 3
+separator: "  # "
+min_age:
+  value: 7      # 7 日未満のリリースはピン留めしない (新規リリース悪用のリスク低減)
+  always: true  # pinact run のたびに既存ピンも含めて経過日数を監査する
+files:
+  - pattern: .github/workflows/*.yaml
+  - pattern: .github/workflows/*.yml

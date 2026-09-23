@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  build:
+    desc: bin/writing-gate をビルドする
+    cmds:
+      - mkdir -p bin
+      - go build -o bin/ ./...
+
+  test:
+    desc: Go のテストと bats を実行する｡bats は bin/writing-gate を使うので先にビルドする
+    cmds:
+      - task: build
+      - go test -race ./...
+      - bats tests/
+
+  lint:
+    desc: golangci-lint と shellcheck を実行する
+    cmds:
+      - task: lint:go
+      - task: lint:shell
+
+  lint:go:
+    desc: golangci-lint を実行する
+    cmds:
+      - golangci-lint run
+
+  lint:shell:
+    desc: シェルスクリプトと bats を shellcheck で点検する
+    cmds:
+      - find . \( -name '*.sh' -o -name '*.bats' -o -name '*.bash' \) -not -path './tmp/*' -not -path './.git/*' -print0 | xargs -0 shellcheck
+
+  validate:
+    desc: plugin の manifest と､JSON / YAML の schema を検証する
+    cmds:
+      - task: validate:plugin
+      - task: validate:schema
+
+  validate:plugin:
+    desc: claude plugin validate --strict を manifest と skills / agents に当てる
+    cmds:
+      # hooks/hooks.json は manifest として扱われて落ちるので対象にしない
+      - claude plugin validate --strict .claude-plugin/plugin.json
+      - claude plugin validate --strict .claude-plugin/marketplace.json
+      - claude plugin validate --strict skills
+      - claude plugin validate --strict agents
+
+  validate:schema:
+    desc: tracked な JSON / YAML を､各ファイルが宣言した schema で検証する
+    cmds:
+      - ./scripts/validate-json-schema.sh
