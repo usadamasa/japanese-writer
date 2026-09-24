@@ -6,8 +6,16 @@
 
 {{.comments_json}}
 
-この節の作業は subagent に任せる。`Agent` ツールで 1 本だけ起動し、結果を待たずに次節へ進む。
-subagent への指示には次を含める。
+まず `writing-feedback` skill が指すルールファイル (prh のルールセットと writing-gate の
+`rules.json`) を置いているリポジトリを確認する。
+
+- 今の cwd と同じリポジトリなら、この節の作業を subagent に任せる。`Agent` ツールで 1 本だけ
+  起動し、結果を待たずに次節へ進む。
+- 今の cwd と違うリポジトリなら、そのリポジトリを cwd にした別セッションへこの節の作業を
+  引き継ぐ ([[cross-session-messaging]] または [[herdr-operations]] の手順に従う)。送信後は
+  結果を待たずに次節へ進む。worktree での代用と `git -C` / `cd` での代用はしない。
+
+いずれの場合も、渡す指示には次を含める。
 
 - 上のコメント全件をそのまま渡す。
 - 人間が読む文 (文書、コードコメント、ログやエラーのメッセージなど) の言い回しへの指摘 (語の選び方、語尾、くどさ、AI っぽさ、表記) を拾う。
@@ -16,10 +24,7 @@ subagent への指示には次を含める。
   crit のコメントは「言い回しを直された」に当たるので、その文書に固有の言い換え
   (固有名やその場の文脈に依存するもの) を除いて登録する。
   NG パターンと書き換え例の対は、コメント本文 (`body`) と返信 (`replies[].body`) から取る。
-- 作業は `writing-feedback` skill が指すルールファイル (prh のルールセットと writing-gate の
-  `rules.json`) を置いているリポジトリに切った worktree で行い、編集もその worktree 内の
-  ファイルに対して行う (plugin の install 先や `~/.claude/` 経由のパスは使わない)。
-  ブランチを切って commit し、Draft PR まで作る。
+- 編集後はブランチを切って commit し、Draft PR まで作る。
 {{end}}
 ## Approve 後の手順
 
