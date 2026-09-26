@@ -4,7 +4,7 @@
 # textlint の振る舞いは検証の対象にしない。npx は固定の JSON を返すモックに差し替える。
 bats_require_minimum_version 1.5.0
 
-SCRIPT_PATH="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/scripts/textlint-run.sh"
+SCRIPT_PATH="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)/bin/textlint-run.sh"
 
 setup() {
   WORKDIR=$(mktemp -d "${TMPDIR:-/tmp}/textlint-run-test.XXXXXX")

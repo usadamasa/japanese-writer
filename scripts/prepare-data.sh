@@ -4,9 +4,7 @@ set -euo pipefail
 # plugin の data ディレクトリ (${CLAUDE_PLUGIN_DATA}) に、hook と crit が使うものを用意する。
 #
 #   1. crit の approve 後 prompt を data の crit/ へ複製する (~/.crit のリンク先を版に依らず固定する)
-#   2. textlint-run.sh を data の scripts/ へ複製する (sandbox の excludedCommands に
-#      固定パスで登録するため。plugin root 配下のパスは版ごとに変わり登録できない)
-#   3. writing-gate を一時ディレクトリへビルドし、検証してから data の bin/ へ置く
+#   2. writing-gate を一時ディレクトリへビルドし、検証してから data の bin/ へ置く
 #
 # plugin root (${CLAUDE_PLUGIN_ROOT}) は版ごとに別のディレクトリになり、update のたびに
 # 中身が入れ替わる。data は update をまたいで残るので、ここへ置けば張り直しが要らない。
@@ -82,20 +80,7 @@ if ! cmp -s "$CRIT_SRC" "$CRIT_DST"; then
 fi
 
 # ---------------------------------------------------------------------------
-# 2. textlint-run.sh
-# ---------------------------------------------------------------------------
-TEXTLINT_SRC="$ROOT/scripts/textlint-run.sh"
-TEXTLINT_DST="$DATA/scripts/textlint-run.sh"
-if ! cmp -s "$TEXTLINT_SRC" "$TEXTLINT_DST"; then
-  mkdir -p "$DATA/scripts" || die "ディレクトリを作成できません: $DATA/scripts"
-  cp "$TEXTLINT_SRC" "$TEXTLINT_DST.tmp" || die "textlint-run.sh を複製できません: $TEXTLINT_DST"
-  chmod +x "$TEXTLINT_DST.tmp" || die "textlint-run.sh を実行可能にできません: $TEXTLINT_DST.tmp"
-  mv -f "$TEXTLINT_DST.tmp" "$TEXTLINT_DST" || die "textlint-run.sh を置き換えられません: $TEXTLINT_DST"
-  say "textlint-run.sh を更新しました: $TEXTLINT_DST"
-fi
-
-# ---------------------------------------------------------------------------
-# 3. writing-gate
+# 2. writing-gate
 # ---------------------------------------------------------------------------
 # input_cksum -> ビルドの入力の cksum を 1 行で返す。パスは root からの相対にして、
 # 版ごとに置き場が変わっても中身が同じなら同じ値にする
