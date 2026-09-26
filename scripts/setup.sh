@@ -148,37 +148,61 @@ stale_plugin_link() {
   return 1
 }
 
-if [ "$LINK_CRIT" = true ]; then
-  if [ -L "$CRIT_PROMPT_DST" ] || [ -e "$CRIT_PROMPT_DST" ]; then
-    # symlink ならその先、実ファイルならそのパスを「今の指し先」として扱う
-    if [ -L "$CRIT_PROMPT_DST" ]; then
-      current=$(readlink "$CRIT_PROMPT_DST")
-    else
-      current="$CRIT_PROMPT_DST (symlink ではない実ファイル)"
-    fi
-    if [ "$current" = "$CRIT_PROMPT_SRC" ]; then
-      say "crit: リンク済み ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
-    elif [ -L "$CRIT_PROMPT_DST" ] && stale_plugin_link "$current"; then
-      if ! link_err=$(ln -sfn "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" 2>&1); then
-        die_unwritable "$CRIT_PROMPT_DST" "$link_err"
-      fi
-      say "crit: 古い版へのリンクを張り替えました ($current -> $CRIT_PROMPT_SRC)"
-    else
-      say "crit: $CRIT_PROMPT_DST は既に別の場所を指しているので触りません: $current"
-      say "crit: plugin のファイルへ向けるなら、そのリンクを消してから --crit をもう一度実行してください"
-    fi
-  else
+# crit_linked -> ~/.crit の prompt が今の plugin のファイルを指していれば 0 を返す
+crit_linked() {
+  [ -L "$CRIT_PROMPT_DST" ] && [ "$(readlink "$CRIT_PROMPT_DST")" = "$CRIT_PROMPT_SRC" ]
+}
+
+# link_crit_prompt -> --crit の処理。状態ごとに報告して抜ける
+link_crit_prompt() {
+  local current link_err
+
+  if crit_linked; then
+    say "crit: リンク済み ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
+    return 0
+  fi
+
+  if [ ! -L "$CRIT_PROMPT_DST" ] && [ ! -e "$CRIT_PROMPT_DST" ]; then
     if ! link_err=$(mkdir -p "$(dirname "$CRIT_PROMPT_DST")" 2>&1 && ln -s "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" 2>&1); then
       die_unwritable "$CRIT_PROMPT_DST" "$link_err"
     fi
     say "crit: リンクしました ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
+    return 0
   fi
-elif command -v crit >/dev/null; then
-  if [ -L "$CRIT_PROMPT_DST" ] && [ "$(readlink "$CRIT_PROMPT_DST")" = "$CRIT_PROMPT_SRC" ]; then
-    say "crit: リンク済み ($CRIT_PROMPT_DST)"
+
+  if [ -L "$CRIT_PROMPT_DST" ] && stale_plugin_link "$(readlink "$CRIT_PROMPT_DST")"; then
+    current=$(readlink "$CRIT_PROMPT_DST")
+    if ! link_err=$(ln -sfn "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" 2>&1); then
+      die_unwritable "$CRIT_PROMPT_DST" "$link_err"
+    fi
+    say "crit: 古い版へのリンクを張り替えました ($current -> $CRIT_PROMPT_SRC)"
+    return 0
+  fi
+
+  # 利用者が自分で張ったリンクか、symlink ではない実ファイル
+  if [ -L "$CRIT_PROMPT_DST" ]; then
+    current=$(readlink "$CRIT_PROMPT_DST")
   else
-    say "crit: 見つかりました｡approve 後の prompt を plugin のものにするなら --crit を付けて実行してください"
+    current="$CRIT_PROMPT_DST (symlink ではない実ファイル)"
   fi
+  say "crit: $CRIT_PROMPT_DST は既に別の場所を指しているので触りません: $current"
+  say "crit: plugin のファイルへ向けるなら、そのリンクを消してから --crit をもう一度実行してください"
+}
+
+# suggest_crit_link -> --crit 無しのとき、crit があればリンクを提案する
+suggest_crit_link() {
+  command -v crit >/dev/null || return 0
+  if crit_linked; then
+    say "crit: リンク済み ($CRIT_PROMPT_DST)"
+    return 0
+  fi
+  say "crit: 見つかりました｡approve 後の prompt を plugin のものにするなら --crit を付けて実行してください"
+}
+
+if [ "$LINK_CRIT" = true ]; then
+  link_crit_prompt
+else
+  suggest_crit_link
 fi
 
 say "完了｡plugin を更新したら (置き場のディレクトリが変わるので) もう一度実行してください"

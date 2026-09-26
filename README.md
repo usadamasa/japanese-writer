@@ -64,10 +64,6 @@ install 先 (`~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/
 /japanese-writer:setup
 ```
 
-Claude Code の sandbox は install 先への書き込みを拒むことがある｡そのときは skill が
-`! "<install 先>/scripts/setup.sh"` の形でコマンドを示すので、プロンプトにそのまま入力する
-(`!` 前置は sandbox の外で実行する)｡
-
 ビルドしていないあいだは、hook が完了を止めて `/japanese-writer:setup` を案内する｡plugin を更新すると
 install 先のディレクトリが変わって `bin/` が無くなるので、もう一度実行する｡
 `bin/` は plugin が有効なあいだ Bash の PATH に載るので、`writing-gate scan` をそのまま呼べる｡
