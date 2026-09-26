@@ -23,8 +23,10 @@ setup() {
   HOME="$WORKDIR/home"
   mkdir -p "$HOME"
   export HOME
-  # jq は本物を使う (結果 JSON の読み取りに要る)
-  PATH="$MOCK_PATH:$(dirname "$(command -v jq)"):/usr/bin:/bin"
+  # jq は本物を使う (結果 JSON の読み取りに要る)。ディレクトリごと PATH に足すと
+  # 同居する npx や crit まで見えてしまうので、jq だけを symlink で持ち込む
+  ln -s "$(command -v jq)" "$MOCK_PATH/jq"
+  PATH="$MOCK_PATH:/usr/bin:/bin"
   export PATH
 
   mock_go
@@ -156,6 +158,26 @@ MOCK
   [ "$status" -eq 0 ]
   [ "$(readlink "$HOME/.crit/prompts/on_finish_approved.md")" = "$WORKDIR/elsewhere/on_finish_approved.md" ]
   [[ "$output" == *"$WORKDIR/elsewhere/on_finish_approved.md"* ]]
+}
+
+@test "--crit で隣の版 (更新前の plugin) を指すリンクは張り替える" {
+  mkdir -p "$HOME/.crit/prompts" "$WORKDIR/0.0.9/crit"
+  printf 'old\n' >"$WORKDIR/0.0.9/crit/on_finish_approved.md"
+  ln -s "$WORKDIR/0.0.9/crit/on_finish_approved.md" "$HOME/.crit/prompts/on_finish_approved.md"
+
+  run "$SCRIPT_PATH" --crit
+  [ "$status" -eq 0 ]
+  [ "$(readlink "$HOME/.crit/prompts/on_finish_approved.md")" = "$ROOT/crit/on_finish_approved.md" ]
+  [[ "$output" == *"張り替え"* ]]
+}
+
+@test "--crit で指し先が消えたリンクは張り替える" {
+  mkdir -p "$HOME/.crit/prompts"
+  ln -s "$WORKDIR/gone/on_finish_approved.md" "$HOME/.crit/prompts/on_finish_approved.md"
+
+  run "$SCRIPT_PATH" --crit
+  [ "$status" -eq 0 ]
+  [ "$(readlink "$HOME/.crit/prompts/on_finish_approved.md")" = "$ROOT/crit/on_finish_approved.md" ]
 }
 
 @test "--crit 無しでは crit がありリンクが無くても張らず、--crit を案内する" {

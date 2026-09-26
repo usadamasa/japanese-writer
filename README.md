@@ -9,6 +9,7 @@
 
 ```text
 ユーザー
+├─ /japanese-writer:setup ── install / update 直後に 1 回 (writing-gate のビルドと検証)
 ├─ 書く ── japanese-tech-writing (Phase 1 構成 → 2 執筆 → 3 推敲)
 │             └─ Phase 3 の最後に proofread を呼ぶ
 ├─ /japanese-writer:proofread ── 添削の入口
@@ -25,6 +26,7 @@
 
 | 種別 | 名前 | 役割 | 呼び方 |
 | ---- | ---- | ---- | ---- |
+| skill | setup | 前提コマンドの確認、writing-gate のビルドと検証、crit の prompt リンク | ユーザーが `/japanese-writer:setup` で呼ぶ (install / update 直後)｡未ビルドのまま Stop hook に止められたときも呼ぶ |
 | skill | japanese-tech-writing | 技術文書の構成・論証・段落の規範｡書き始める前の構成検討から推敲まで扱う | 文書を書くとき Claude が読み込む｡`/japanese-writer:japanese-tech-writing` で明示的にも呼べる |
 | skill | proofread | md ドラフトの総合添削｡proofreader subagent へ委譲し、修正案が一意なものは適用して報告し、論証に関わるものは警告に留める | ユーザーが `/japanese-writer:proofread` で呼ぶ (添削の入口) |
 | skill | textlint-check | textlint による機械点検と自動修正｡呼び出し元が `config_root` で config を切り替える | proofread の内側から呼ばれる｡機械点検だけ欲しいときは単体でも呼べる |
@@ -52,30 +54,36 @@ Claude Code で次を実行する｡
 /plugin install japanese-writer@japanese-writer
 ```
 
-### writing-gate のビルド
+### セットアップ
 
-Stop hook は plugin の `bin/writing-gate` を起動する｡install しただけではバイナリが無いので、
-install 先 (`~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/`) で一度ビルドする｡
+install したら続けて次を実行する｡前提コマンドを確かめ、Stop hook が起動する `bin/writing-gate` を
+install 先 (`~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/`) にビルドして、
+既知の漏出パターンを拾えることまで検証する｡
 
-```sh
-go build -o bin/ ./...
+```text
+/japanese-writer:setup
 ```
 
-ビルドしていないあいだは、hook が完了を止めてビルドの手順を示す｡plugin を更新したら再ビルドする｡
+Claude Code の sandbox は install 先への書き込みを拒むことがある｡そのときは skill が
+`! "<install 先>/scripts/setup.sh"` の形でコマンドを示すので、プロンプトにそのまま入力する
+(`!` 前置は sandbox の外で実行する)｡
+
+ビルドしていないあいだは、hook が完了を止めて `/japanese-writer:setup` を案内する｡plugin を更新すると
+install 先のディレクトリが変わって `bin/` が無くなるので、もう一度実行する｡
 `bin/` は plugin が有効なあいだ Bash の PATH に載るので、`writing-gate scan` をそのまま呼べる｡
 
 ### crit との連動 (任意)
 
 [crit](https://github.com/tomasz-tomczyk/crit) を使っているなら、approve 後の prompt を plugin の
-ファイルへリンクする｡
+ファイルへリンクする｡`crit` が PATH にあると setup がこれを提案する｡手で張るなら `--crit` を付けて
+スクリプトを実行する｡
 
 ```sh
-mkdir -p ~/.crit/prompts
-ln -s ~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/crit/on_finish_approved.md \
-  ~/.crit/prompts/on_finish_approved.md
+~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/scripts/setup.sh --crit
 ```
 
-リンク先はバージョンのディレクトリを含むので、plugin を更新したら張り直す｡
+リンク先はバージョンのディレクトリを含むので、plugin を更新したら `--crit` でもう一度張る｡
+古い版を指すリンクと指し先が消えたリンクは張り替え、それ以外の場所を指しているときは触らずに報告だけする｡
 
 ## 文体とドメイン用語の差し込み
 
