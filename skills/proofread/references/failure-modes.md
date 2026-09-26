@@ -26,7 +26,7 @@ npx / jq の不在、 config の不在、 config が参照する rule の解決�
 
 **subagent 動作**: 該当 step を skip し `failures` に記録して続行｡
 
-**親動作**: F1 と同様に Stage 1 冒頭で警告｡
+**親動作**: F1 と同様に Stage 1 の報告冒頭で警告｡
 
 **ユーザー指示**: 該当 skill が読める状態に戻す (plugin なら再インストール、`style_check` / `domain_check` で
 差し込んだ skill なら、その skill のデプロイ先を確かめる)｡
@@ -58,7 +58,7 @@ npx / jq の不在、 config の不在、 config が参照する rule の解決�
 }
 ```
 
-**親動作**: Stage 1 dry-run に `⚠ Tier 1 の {N-1} 件まで apply 済 ｡ 以降は停止 (理由: ...)｡ 未適用分は Tier 2 として表示` と表示し、 `tier1_pending` を Tier 2 リストに編入 (ID は `2-X` として振り直し)｡
+**親動作**: Stage 1 の報告に `⚠ Tier 1 の {N-1} 件まで apply 済 ｡ 以降は停止 (理由: ...)｡ 未適用分は Tier 2 として扱う` と表示し、 `tier1_pending` を Tier 2 リストに編入 (ID は `2-X` として振り直し) して親が適用する｡ 親でも Edit が失敗した ID は「Tier 2 未適用」に理由付きで載せる｡
 
 ## F5: subagent 判定異常 (大量変更)
 
@@ -73,7 +73,7 @@ npx / jq の不在、 config の不在、 config が参照する rule の解決�
 }
 ```
 
-**親動作**: Stage 1 dry-run 冒頭に `⚠ Tier 1 が異常規模 (X% 変更) ｡ 親で git diff 確認、 revert 推奨` と表示｡ ユーザーに git status / git diff 確認と revert 判断を委ねる｡
+**親動作**: Tier 2 の適用を止め、 報告冒頭に `⚠ Tier 1 が異常規模 (X% 変更) ｡ 親で git diff 確認、 revert 推奨` と表示｡ Tier 2 は全件「未適用」に載せ、 ユーザーに git status / git diff 確認と revert 判断を委ねる｡ 異常規模の上に Tier 2 を重ねると、 revert で戻す範囲が判別できなくなる｡
 
 **ユーザー指示**: `git diff -- {file_path}` で確認後、 必要なら `git restore -- {file_path}` で revert｡
 どちらも cwd が {repo} のセッションで打つ｡
@@ -83,4 +83,4 @@ npx / jq の不在、 config の不在、 config が参照する rule の解決�
 - subagent の Edit は **Step 6 にのみ集約** ｡ Step 1〜5 の解析中は Edit 呼ばない (F3/F5 時の部分破損禁止)
 - 前提条件の不足 (F1) は dispatch 前にエラー終了する｡ 対象の md へ触る前に止めるので、 部分的に添削された状態を作らない
 - dispatch 後の失敗 (F2) は該当 step を skip して他の step は走る｡ 既にファイルへ手を入れた後なので、 途中で止めるより結果を返すほうが復旧しやすい
-- F4 で部分 apply 済みになった場合、 「未 apply 分を Tier 2 化して再 review」 がデフォルトリカバリ
+- F4 で部分 apply 済みになった場合、 「未 apply 分を Tier 2 化して親が適用する」 がデフォルトリカバリ
