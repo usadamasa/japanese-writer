@@ -37,10 +37,11 @@ if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
   exit 0
 fi
 
-BIN="$SCRIPT_DIR/../bin/writing-gate"
-if [ ! -x "$BIN" ]; then
+# バイナリは SessionStart hook が data ディレクトリへビルドする (plugin root は版ごとに変わる)
+BIN="${CLAUDE_PLUGIN_DATA:-}/bin/writing-gate"
+if [ -z "${CLAUDE_PLUGIN_DATA:-}" ] || [ ! -x "$BIN" ]; then
   # 未ビルドだと文章のゲートが丸ごと無効になる。黙って通さず、その事実を報告する。
-  jq -cn --arg r "writing-gate が見つかりません｡文章の完了ゲートが無効な状態です｡/japanese-writer:setup を実行して writing-gate をビルドしてください｡" \
+  jq -cn --arg r "writing-gate が見つかりません ($BIN)｡文章の完了ゲートが無効な状態です｡セッション開始時の自動ビルドが失敗しています｡/japanese-writer:setup を実行して原因を確認してください｡" \
     '{"decision":"block","reason":$r}'
   exit 0
 fi

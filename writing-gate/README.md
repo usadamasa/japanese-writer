@@ -170,16 +170,21 @@ glob は `**/dir/**` (パスに `/dir/` を含む) と `**/name.md` (basename �
 ## hook との配線
 
 ```text
+SessionStart hook (hooks/session-start-prepare.sh)
+  └─ scripts/prepare-data.sh --if-stale
+       └─ Go のソースと rules.json の cksum が前回と違えば ${CLAUDE_PLUGIN_DATA}/bin/ へビルドし直す
+
 Stop hook (hooks/stop-writing-gate.sh)
-  └─ <hooks の隣の bin>/writing-gate gate --transcript <path>
+  └─ ${CLAUDE_PLUGIN_DATA}/bin/writing-gate gate --transcript <path>
        ├─ transcript から Write/Edit/MultiEdit/NotebookEdit の .md を拾う
        ├─ 除外と上限 (既定 20 件) を当てる
        ├─ 点検する
        └─ error があれば {"decision":"block","reason":...} を出す
 ```
 
-hook はバイナリを自分のディレクトリからの相対 (`../bin/writing-gate`) で起動し、PATH は見ない｡
-hook が継承する PATH は起動元の環境で変わるため｡
+hook はバイナリを plugin の data ディレクトリから絶対パスで起動し、PATH は見ない｡
+hook が継承する PATH は起動元の環境で変わるため｡plugin root (`${CLAUDE_PLUGIN_ROOT}`) は
+版ごとに別のディレクトリになり update で入れ替わるので、ビルドの置き場には使わない｡
 
 hook 側の判断:
 
@@ -193,12 +198,12 @@ npx を経由しない｡textlint を通すと完了のたびに数秒待たさ�
 ## 検証
 
 ```sh
-go test ./...                      # 単体テスト
-go build -o <hooks の隣の bin>/ ./... # 埋め込みルールを反映する
+go test ./...  # 単体テスト
+task build     # 埋め込みルールを反映した bin/writing-gate を作る
 
 # リポジトリ全体へ当てて誤検出を見る
 git ls-files '*.md' > ./tmp/l.txt
-xargs writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings}'
+xargs ./bin/writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings}'
 ```
 
 ルールを足したら、直したかった文を拾うことと、既存の md で誤検出が増えないことの

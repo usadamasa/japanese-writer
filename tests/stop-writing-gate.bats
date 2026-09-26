@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 # stop-writing-gate.sh のテスト
 #
-# hook は自分の ../bin/writing-gate を絶対パスで起動する (PATH は見ない)。
-# 実リポジトリの shared/bin/ を巻き込まないよう、隔離ツリーに複製して実行する。
+# hook は ${CLAUDE_PLUGIN_DATA}/bin/writing-gate を絶対パスで起動する (PATH も plugin root の
+# bin/ も見ない)。実リポジトリを巻き込まないよう、隔離ツリーに複製して実行する。
 bats_require_minimum_version 1.5.0
 
 load lib/hook-test-helpers
@@ -15,7 +15,10 @@ setup() {
   mkdir -p "$TEST_TMPDIR"
 
   FAKE_HOOKS=$(setup_fake_hooks_tree "$TEST_TMPDIR/fake")
-  FAKE_BIN="$TEST_TMPDIR/fake/bin"
+  CLAUDE_PLUGIN_DATA="$TEST_TMPDIR/data"
+  export CLAUDE_PLUGIN_DATA
+  FAKE_BIN="$CLAUDE_PLUGIN_DATA/bin"
+  mkdir -p "$FAKE_BIN"
   SCRIPT_PATH="$FAKE_HOOKS/stop-writing-gate.sh"
 
   TRANSCRIPT="$TEST_TMPDIR/session.jsonl"
@@ -78,14 +81,37 @@ make_stop_input() {
   [[ "$output" != *"block"* ]]
 }
 
-@test "writing-gate が未ビルドなら block してその事実を伝える" {
+@test "writing-gate が未ビルドなら block して setup を案内する" {
   run_hook "$SCRIPT_PATH" <<< "$(make_stop_input "$TRANSCRIPT")"
   [ "$status" -eq 0 ]
   [ "$(jq -r '.decision' <<< "$output")" = "block" ]
-  [[ "$(jq -r '.reason' <<< "$output")" == *"ビルドして"* ]]
+  [[ "$(jq -r '.reason' <<< "$output")" == *"/japanese-writer:setup"* ]]
 }
 
-@test "PATH 上の writing-gate は使わない (../bin/ のみ)" {
+@test "CLAUDE_PLUGIN_DATA が無ければ block して setup を案内する" {
+  write_mock_gate '{}'
+  unset CLAUDE_PLUGIN_DATA
+
+  run_hook "$SCRIPT_PATH" <<< "$(make_stop_input "$TRANSCRIPT")"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.decision' <<< "$output")" = "block" ]
+  [[ "$(jq -r '.reason' <<< "$output")" == *"/japanese-writer:setup"* ]]
+}
+
+@test "plugin root の bin/ にある writing-gate は使わない" {
+  cat > "$TEST_TMPDIR/fake/bin/writing-gate" << 'MOCKEOF'
+#!/bin/bash
+printf '%s\n' '{"decision":"block","reason":"root 側が動いた"}'
+MOCKEOF
+  chmod +x "$TEST_TMPDIR/fake/bin/writing-gate"
+  write_mock_gate '{}'
+
+  run_hook "$SCRIPT_PATH" <<< "$(make_stop_input "$TRANSCRIPT")"
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"root 側が動いた"* ]]
+}
+
+@test "PATH 上の writing-gate は使わない" {
   cat > "$MOCK_BIN/writing-gate" << 'MOCKEOF'
 #!/bin/bash
 printf '%s\n' '{"decision":"block","reason":"PATH 側が動いた"}'
