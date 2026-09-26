@@ -155,6 +155,7 @@ stdout のサマリから件数を読み、`lint_result_path` とあわせて返
 | 点検対象が無い / 絶対パスでない | `file_path` を見直す |
 | 出力先ディレクトリが無い | `tmp_dir` を作ってから呼ぶ |
 | textlint が JSON を返さない | stderr に textlint の出力がそのまま出る｡多くは config の rule 解決失敗 |
+| stdout が空 (EACCES など) | sandbox が書き込みを拒否するパスに autofix を当てた｡`file_path` の書き込み先を見直す |
 | `${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh` が無い (exit 127, `No such file or directory`) | SessionStart hook がまだ準備していない｡`/japanese-writer:setup` を実行する |
 
 ## 同梱する config

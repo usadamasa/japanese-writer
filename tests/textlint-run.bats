@@ -107,6 +107,56 @@ MOCK
   [ "$output" = "5" ]
 }
 
+# fix パスが書き込み権限エラーで空の stdout を返すモック。
+# .claude/ 配下など sandbox が書き込みを拒否するパスに --fix を当てると textlint 自身が
+# これと同じ挙動 (stderr にエラー、stdout は空、exit 1) になる。
+mock_npx_fix_empty_stdout() {
+  cat >"$WORKDIR/bin/npx" <<'MOCK'
+#!/bin/bash
+for arg in "$@"; do
+  if [ "$arg" = "--fix" ]; then
+    printf 'Unexpected error during file processing: Error: EACCES: permission denied\n' >&2
+    exit 1
+  fi
+done
+printf '%s\n' '[{"filePath":"/x/doc.md","messages":[]}]'
+exit 0
+MOCK
+  chmod +x "$WORKDIR/bin/npx"
+}
+
+@test "fix パスの stdout が空ならエラー終了し、結果 JSON を残さない" {
+  mock_npx_fix_empty_stdout
+  run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"textlint (fix) の実行に失敗しました"* ]]
+  [[ "$output" == *"EACCES"* ]]
+  [ ! -e "$OUTPUT" ]
+}
+
+# 対象が .textlintignore などで無視されると、textlint は指摘 0 件の配列ではなく
+# 空配列 `[]` を exit 0 で返す (実測)。これは失敗ではないので run_pass は通す必要がある。
+mock_npx_empty_array() {
+  cat >"$WORKDIR/bin/npx" <<'MOCK'
+#!/bin/bash
+printf '%s\n' '[]'
+exit 0
+MOCK
+  chmod +x "$WORKDIR/bin/npx"
+}
+
+@test "textlint に無視されて空配列 [] が返っても成功扱いにする" {
+  mock_npx_empty_array
+  run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
+
+  [ "$status" -eq 0 ]
+  run jq -r '.applied_fixes | length' "$OUTPUT"
+  [ "$output" = "0" ]
+  run jq -r '.remaining_issues | length' "$OUTPUT"
+  [ "$output" = "0" ]
+}
+
 @test "サマリを stdout に出す" {
   mock_npx_two_pass
   run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
@@ -145,7 +195,7 @@ for arg in "\$@"; do
   prev="\$arg"
 done
 printf '%s %s\n' "\$pass" "\$config" >> "$WORKDIR/config.log"
-printf '%s\n' '[]'
+printf '%s\n' '[{"filePath":"/x/doc.md","messages":[]}]'
 MOCK
   chmod +x "$WORKDIR/bin/npx"
 }
