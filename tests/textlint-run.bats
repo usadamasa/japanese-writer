@@ -107,6 +107,32 @@ MOCK
   [ "$output" = "5" ]
 }
 
+# fix パスが書き込み権限エラーで空の stdout を返すモック。
+# .claude/ 配下など sandbox が書き込みを拒否するパスに --fix を当てると textlint 自身が
+# これと同じ挙動 (stderr にエラー、stdout は空、exit 1) になる。
+mock_npx_fix_empty_stdout() {
+  cat >"$WORKDIR/bin/npx" <<'MOCK'
+#!/bin/bash
+for arg in "$@"; do
+  if [ "$arg" = "--fix" ]; then
+    printf 'Unexpected error during file processing: Error: EACCES: permission denied\n' >&2
+    exit 1
+  fi
+done
+printf '%s\n' '[{"filePath":"/x/doc.md","messages":[]}]'
+exit 0
+MOCK
+  chmod +x "$WORKDIR/bin/npx"
+}
+
+@test "fix パスの stdout が空ならエラー終了し、結果 JSON を残さない" {
+  mock_npx_fix_empty_stdout
+  run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
+
+  [ "$status" -ne 0 ]
+  [ ! -e "$OUTPUT" ]
+}
+
 @test "サマリを stdout に出す" {
   mock_npx_two_pass
   run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
@@ -145,7 +171,7 @@ for arg in "\$@"; do
   prev="\$arg"
 done
 printf '%s %s\n' "\$pass" "\$config" >> "$WORKDIR/config.log"
-printf '%s\n' '[]'
+printf '%s\n' '[{"filePath":"/x/doc.md","messages":[]}]'
 MOCK
   chmod +x "$WORKDIR/bin/npx"
 }
