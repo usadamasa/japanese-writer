@@ -189,6 +189,37 @@ teardown() {
 }
 
 # =============================================================================
+# textlint-run.sh
+#
+# CLAUDE_PLUGIN_ROOT は plugin の version ごとにパスが変わるため、sandbox の
+# excludedCommands へ固定パスとして登録できない。update を跨いで固定の
+# CLAUDE_PLUGIN_DATA へ複製し、呼び出し元はそちらを指すようにする。
+# =============================================================================
+
+@test "textlint-run.sh を data の scripts/ へ複製する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  cmp -s "$ROOT/scripts/textlint-run.sh" "$DATA/scripts/textlint-run.sh"
+}
+
+@test "複製した textlint-run.sh は実行可能" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  [ -x "$DATA/scripts/textlint-run.sh" ]
+}
+
+@test "--if-stale でビルドしないときも textlint-run.sh は新しい版の内容に揃える" {
+  run "$SCRIPT_PATH" --if-stale
+  [ "$status" -eq 0 ]
+  printf '\n# 追記\n' >>"$ROOT/scripts/textlint-run.sh"
+
+  run "$SCRIPT_PATH" --if-stale
+  [ "$status" -eq 0 ]
+  [ "$(go_calls)" -eq 1 ]
+  cmp -s "$ROOT/scripts/textlint-run.sh" "$DATA/scripts/textlint-run.sh"
+}
+
+# =============================================================================
 # 引数
 # =============================================================================
 
