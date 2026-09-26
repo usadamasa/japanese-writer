@@ -130,7 +130,31 @@ MOCK
   run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
 
   [ "$status" -ne 0 ]
+  [[ "$output" == *"textlint (fix) の実行に失敗しました"* ]]
+  [[ "$output" == *"EACCES"* ]]
   [ ! -e "$OUTPUT" ]
+}
+
+# 対象が .textlintignore などで無視されると、textlint は指摘 0 件の配列ではなく
+# 空配列 `[]` を exit 0 で返す (実測)。これは失敗ではないので run_pass は通す必要がある。
+mock_npx_empty_array() {
+  cat >"$WORKDIR/bin/npx" <<'MOCK'
+#!/bin/bash
+printf '%s\n' '[]'
+exit 0
+MOCK
+  chmod +x "$WORKDIR/bin/npx"
+}
+
+@test "textlint に無視されて空配列 [] が返っても成功扱いにする" {
+  mock_npx_empty_array
+  run "$SCRIPT_PATH" --config "$CONFIG" --output "$OUTPUT" "$TARGET"
+
+  [ "$status" -eq 0 ]
+  run jq -r '.applied_fixes | length' "$OUTPUT"
+  [ "$output" = "0" ]
+  run jq -r '.remaining_issues | length' "$OUTPUT"
+  [ "$output" = "0" ]
 }
 
 @test "サマリを stdout に出す" {
