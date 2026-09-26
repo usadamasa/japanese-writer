@@ -81,15 +81,23 @@ fi
 # ---------------------------------------------------------------------------
 # 2. ビルド
 # ---------------------------------------------------------------------------
-# sandbox に拒まれたときは、go を走らせる前にここで止まる
-if ! write_err=$(mkdir -p "$BIN_DIR" 2>&1 && touch "$BIN_DIR/.write-probe" 2>&1); then
-  printf '%s\n' "$write_err" >&2
-  rerun_args=""
+# die_unwritable PATH ERR -> 書き込み拒否の案内を出して exit 1 する。
+# Claude Code の Bash から呼ばれたときは sandbox が原因のことが多いので、sandbox の外で
+# 同じ引数で打ち直すコマンドを示す。`!` でも同じなら権限そのものの問題になる。
+die_unwritable() {
+  local rerun_args=""
   [ "$LINK_CRIT" = true ] && rerun_args=" --crit"
-  say "$BIN_DIR へ書き込めません｡Claude Code の sandbox は plugin の置き場への書き込みを拒みます｡"
+  printf '%s\n' "$2" >&2
+  say "$1 へ書き込めません｡Claude Code の Bash から実行しているなら、sandbox が拒んでいる可能性があります｡"
   say "次のコマンドを Claude Code のプロンプトにそのまま入力すると、sandbox の外で実行できます:"
   printf '\n  ! "%s"%s\n\n' "$SCRIPT_PATH" "$rerun_args"
+  say "それでも同じなら、$1 の所有者と権限を確認してください"
   exit 1
+}
+
+# sandbox に拒まれたときは、go を走らせる前にここで止まる
+if ! write_err=$(mkdir -p "$BIN_DIR" 2>&1 && touch "$BIN_DIR/.write-probe" 2>&1); then
+  die_unwritable "$BIN_DIR" "$write_err"
 fi
 rm -f "$BIN_DIR/.write-probe"
 
@@ -151,15 +159,18 @@ if [ "$LINK_CRIT" = true ]; then
     if [ "$current" = "$CRIT_PROMPT_SRC" ]; then
       say "crit: リンク済み ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
     elif [ -L "$CRIT_PROMPT_DST" ] && stale_plugin_link "$current"; then
-      ln -sfn "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" || die "リンクを張り替えられません: $CRIT_PROMPT_DST"
+      if ! link_err=$(ln -sfn "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" 2>&1); then
+        die_unwritable "$CRIT_PROMPT_DST" "$link_err"
+      fi
       say "crit: 古い版へのリンクを張り替えました ($current -> $CRIT_PROMPT_SRC)"
     else
       say "crit: $CRIT_PROMPT_DST は既に別の場所を指しているので触りません: $current"
       say "crit: plugin のファイルへ向けるなら、そのリンクを消してから --crit をもう一度実行してください"
     fi
   else
-    mkdir -p "$(dirname "$CRIT_PROMPT_DST")" || die "$(dirname "$CRIT_PROMPT_DST") を作成できません"
-    ln -s "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" || die "リンクを作成できません: $CRIT_PROMPT_DST"
+    if ! link_err=$(mkdir -p "$(dirname "$CRIT_PROMPT_DST")" 2>&1 && ln -s "$CRIT_PROMPT_SRC" "$CRIT_PROMPT_DST" 2>&1); then
+      die_unwritable "$CRIT_PROMPT_DST" "$link_err"
+    fi
     say "crit: リンクしました ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
   fi
 elif command -v crit >/dev/null; then

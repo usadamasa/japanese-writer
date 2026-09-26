@@ -24,7 +24,7 @@ stdout と stderr をそのまま読む｡終了コード 0 なら Step 3 へ、
 | 出力に含まれる文言 | 意味 | 利用者へ返すこと |
 | ---- | ---- | ---- |
 | `前提コマンドが不足しています` | go / npx / jq のどれかが PATH に無い | 足りないコマンド名と用途 (出力にある) をそのまま伝える｡インストールは利用者の環境の話なので、代わりに入れない |
-| `へ書き込めません` | sandbox が plugin の置き場への書き込みを拒んだ | 出力にある `! "…/scripts/setup.sh"` の行をそのまま示し、Claude Code のプロンプトに入力すると sandbox の外で実行できると伝える｡`dangerouslyDisableSandbox` では回避しない |
+| `へ書き込めません` | sandbox が plugin の置き場か `~/.crit` への書き込みを拒んだ | 出力にある `! "…/scripts/setup.sh"` の行をそのまま示し、Claude Code のプロンプトに入力すると sandbox の外で実行できると伝える｡`dangerouslyDisableSandbox` では回避しない｡利用者が `!` で実行しても同じ文言なら、そのディレクトリの所有者と権限の問題として伝える |
 | `go build に失敗しました` | Go のビルドが落ちた | 直前に流れた go の出力を要約して伝える｡go.mod の要求より古い Go だと toolchain の取得で落ちる |
 | `既知の process-leak パターンを拾いません` | 古いバイナリか埋め込みルールの破損 | plugin の版と `bin/writing-gate` の作成日時を伝え、`bin/` を消してから再実行するよう案内する |
 

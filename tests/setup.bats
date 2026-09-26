@@ -180,6 +180,15 @@ MOCK
   [ "$(readlink "$HOME/.crit/prompts/on_finish_approved.md")" = "$ROOT/crit/on_finish_approved.md" ]
 }
 
+@test "--crit で ~/.crit に書けなければ --crit 付きの ! 前置のコマンドを出して exit 1 する" {
+  mkdir -p "$HOME/.crit"
+  chmod a-w "$HOME/.crit"
+
+  run "$SCRIPT_PATH" --crit
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"! \"$SCRIPT_PATH\" --crit"* ]]
+}
+
 @test "--crit 無しでは crit がありリンクが無くても張らず、--crit を案内する" {
   mock_cmd crit
 
