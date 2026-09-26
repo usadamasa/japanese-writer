@@ -4,16 +4,35 @@
 
 ## 収録内容
 
-| 種別 | 名前 | 役割 |
-| ---- | ---- | ---- |
-| skill | japanese-tech-writing | 技術文書の構成・論証・段落の規範｡書き始める前の構成検討から推敲まで扱う |
-| skill | proofread | md ドラフトの総合添削｡proofreader subagent へ委譲し、確度別に分類した修正案を返す |
-| skill | textlint-check | textlint による機械点検と自動修正｡呼び出し元が `config_root` で config を切り替える |
-| skill | sanitize-artifacts | 対話で仕上げた成果物から、制作過程と却下した案の痕跡を取り除く |
-| skill | writing-feedback | 言い回しへの指摘を prh のルールとして登録し、次から機械が拾えるようにする |
-| agent | proofreader | proofread skill から呼ばれる添削担当の subagent｡直接は呼ばない |
-| hook | Stop: writing-gate | セッションを閉じるときに、編集した `.md` を点検して重大な指摘があれば完了を止める |
-| crit prompt | `crit/on_finish_approved.md` | crit のレビューが approve されたとき、言い回しへの指摘を writing-feedback へ回す |
+入口は 2 つ｡書くときは `japanese-tech-writing` が構成から推敲まで導き、書き上がったら
+`/japanese-writer:proofread` で添削する｡残りは proofread の内側から呼ばれるか、指摘を受けたときに使う｡
+
+```text
+ユーザー
+├─ 書く ── japanese-tech-writing (Phase 1 構成 → 2 執筆 → 3 推敲)
+│             └─ Phase 3 の最後に proofread を呼ぶ
+├─ /japanese-writer:proofread ── 添削の入口
+│    ├─ textlint-check (機械点検と autofix)
+│    └─ proofreader (subagent)
+│         ├─ japanese-tech-writing (規範として読む)
+│         ├─ sanitize-artifacts (漏出の観点として読む)
+│         ├─ style_check で差し込んだ文体 skill (任意)
+│         └─ domain_check で差し込んだ用語 skill (任意)
+├─ /japanese-writer:writing-feedback ── 言い回しを直されたとき
+│    └─ crit の approve 後の prompt (crit/on_finish_approved.md) からも呼ばれる
+└─ (自動) Stop hook: writing-gate ── セッションを閉じるとき
+```
+
+| 種別 | 名前 | 役割 | 呼び方 |
+| ---- | ---- | ---- | ---- |
+| skill | japanese-tech-writing | 技術文書の構成・論証・段落の規範｡書き始める前の構成検討から推敲まで扱う | 文書を書くとき Claude が読み込む｡`/japanese-writer:japanese-tech-writing` で明示的にも呼べる |
+| skill | proofread | md ドラフトの総合添削｡proofreader subagent へ委譲し、修正案が一意なものは適用して報告し、論証に関わるものは警告に留める | ユーザーが `/japanese-writer:proofread` で呼ぶ (添削の入口) |
+| skill | textlint-check | textlint による機械点検と自動修正｡呼び出し元が `config_root` で config を切り替える | proofread の内側から呼ばれる｡機械点検だけ欲しいときは単体でも呼べる |
+| skill | sanitize-artifacts | 対話で仕上げた成果物から、制作過程と却下した案の痕跡を取り除く | proofreader が点検の観点として読み込む｡「これは消して」の後の作り直しでは単体で呼ぶ |
+| skill | writing-feedback | 言い回しへの指摘を prh のルールとして登録し、次から機械が拾えるようにする | ユーザーが言い回しを直したときに呼ぶ｡crit の approve 後の prompt からも回る |
+| agent | proofreader | proofread skill から呼ばれる添削担当の subagent | proofread が dispatch する｡直接は呼ばない |
+| hook | Stop: writing-gate | セッションを閉じるときに、編集した `.md` を点検して重大な指摘があれば完了を止める | 自動 (完了時) |
+| crit prompt | `crit/on_finish_approved.md` | crit のレビューが approve されたとき、言い回しへの指摘を writing-feedback へ回す | crit が approve 時に読む |
 
 writing-gate は文書全体の集計 (語尾の連続・文体の混在) と逐語の漏出を見る Go 製の CLI｡
 設計とルールの置き場は [writing-gate/README.md](writing-gate/README.md) にある｡
@@ -81,7 +100,11 @@ proofread は汎用の機械点検と文章規範だけを持つ｡書き手ご�
 plugin を使うだけなら「前提」節のツールで足りる｡このリポジトリで開発するときは､加えて次を用意する｡
 
 - [aqua](https://aquaproj.github.io/)｡task・golangci-lint・shellcheck・pinact・jv の版を `aqua.yaml` で固定している｡
-  `aqua i -l` で shim を張り､`$(aqua root-dir)/bin` を PATH に通す
+  `.envrc` が shim を張って `$(aqua root-dir)/bin` を PATH に足すので､direnv を入れて `direnv allow` する｡
+  direnv を使わないなら `aqua i -l` を打ち､同じパスを自分で PATH に通す
+- [jv](https://github.com/santhosh-tekuri/jsonschema) (`task validate` が JSON / YAML を宣言された schema で検証するのに使う)｡
+  aqua で入るので個別のインストールは要らない｡Homebrew には formula が無く､aqua を使わない場合は
+  `go install github.com/santhosh-tekuri/jsonschema/cmd/jv@latest` で入れる
 - [bats-core](https://github.com/bats-core/bats-core) (`task test` が使う)
 - Claude Code CLI (`task validate` が `claude plugin validate` を呼ぶ)
 

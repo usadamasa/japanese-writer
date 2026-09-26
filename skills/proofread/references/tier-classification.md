@@ -24,9 +24,9 @@ proofreader は [[japanese-tech-writing]] の Phase 3 self-check の **subagent 
 **動作**: textlint 由来のものは親が Step 0 で適用済み｡ それ以外 (domain_check 由来の確定置換など) を
 subagent が `Edit` ツールで適用する｡ 親には件数と適用箇所の行番号のみ報告｡
 
-## Tier 2: 提案 (親で executing-plans 風レビュー)
+## Tier 2: 提案 (親が適用して報告)
 
-**判定基準**: 候補は出せるが､ 選択に文脈判断が要る｡ 構造変更を含む｡
+**判定基準**: 修正案を 1 つに書けるが､ 文意や構造に触れるので何を変えたか報告が要る｡
 
 | 修正内容 | 例 |
 |---------|-----|
@@ -36,7 +36,9 @@ subagent が `Edit` ツールで適用する｡ 親には件数と適用箇所�
 | **japanese-tech-writing Phase 2 新規節違反** | 一文 100 字超 (Phase 2.5)・読点 3 個以上 / 平易語の選択 (Phase 2.6) / 「あなた」使用 (Phase 2.4 で却下されている) |
 | **制作過程の漏出** ([[sanitize-artifacts]]) | 依頼への応答 (「ご要望に従い」) / 修正の履歴 (「前回の版と異なり」) / 制約の宣言 (「〜は使わない」) / 方針転換の経緯注記 (「以前は X だったが現在は不要」) → 削除案、 または制約を満たした記述への置換案 |
 
-**動作**: subagent が diff/箇条書きで親に return｡ 親は Stage 2 で apply 対象 ID を受領後 `Edit` 適用｡
+**動作**: subagent が `current` / `suggestion` の対で親に return｡ 親は Stage 1 で問い合わせずに `Edit` 適用し、
+前後を報告する｡ ユーザーは報告後に `revert 2-N` で戻せる｡ `suggestion` を 1 つに書けない検出は Tier 2 に
+入れず Tier 3 にする｡
 
 ## Tier 3: 警告のみ (修正しない)
 
@@ -49,7 +51,7 @@ subagent が `Edit` ツールで適用する｡ 親には件数と適用箇所�
 | 規範違反だが修正方向が複数あって絞れない | 「視点と語り」 違反 (受動態が連続) など |
 | **制作過程の漏出のうち読者の要否が割れるもの** ([[sanitize-artifacts]]) | 回避した手段への言及が ADR の `Alternatives considered` に相当しうる / 断り書きが読者に必要か判断できない |
 
-**動作**: subagent が警告のみ return｡ 親は Stage 1 で警告表示｡ ユーザーが Stage 1.5 (deep-dive) で詳細を要求できる｡ Tier 3 自体は apply 対象外｡
+**動作**: subagent が警告のみ return｡ 親は Stage 1 の報告に警告として載せる｡ ユーザーが Stage 1.5 (deep-dive) で詳細を要求できる｡ Tier 3 自体は apply 対象外｡
 
 **Phase 3 self-check との重複**: 上記「Phase 3 self-check 項目に該当する論理構造違反」は、 書き手が Phase 3 で頭で点検済みであっても subagent が再度スキャンする｡書き手の主観が見落としたものを拾うのが目的｡警告だけ出して、 ユーザーが必要なら deep-dive で詳細確認できる｡
 
@@ -77,8 +79,9 @@ subagent が `Edit` ツールで適用する｡ 親には件数と適用箇所�
    - Tier 1 には落とさない｡ 漏出の判定は読者の要否に依存し、 機械的な一意解が無いため
 
 5. 修正内容が **style_check 由来** (差し込まれた文体 skill の違反) なら:
-   - 文体の指紋 (語尾､ 接続詞) のずれ → **Tier 2**
-   (Tier 1/3 該当なし — 個人文体は機械修正の対象外であり､ 警告のみで apply 候補にならないケースは Tier 2 で `suggestion` 不完全として扱う)
+   - 文体の指紋 (語尾､ 接続詞) のずれで、 書き換え後の文を 1 つに書ける → **Tier 2**
+   - 書き換え後の文を 1 つに絞れない (個人文体は機械修正の対象外) → **Tier 3** (警告のみ)
+   - Tier 1 には落とさない｡ 文体の判定は文脈に依存し、 黙って直してよい一意解が無いため
    - `style_check` 未指定なら、このチェック自体を行わない (`skipped` に記録)｡
 
 ## 文書の種類別の優先度調整 (japanese-tech-writing Phase 1.2 マトリクスに従う)

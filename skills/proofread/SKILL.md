@@ -3,7 +3,8 @@ name: proofread
 description: >-
   md ドラフト (wiki 草稿、 ADR/Design Doc、 探索ノート、 タスク本文の下書き) の総合添削｡
   機械点検・文章規範・制作過程の漏出のチェックを proofreader subagent に集約して
-  別コンテキストで実行し、確度別に分類した修正案を返す｡
+  別コンテキストで実行し、確度別に分類した修正を適用して報告する｡
+  修正案が一意なものは問い合わせずに反映し、論証や事実確認が要るものだけ警告に留める｡
   ドメイン固有の用語・事実チェックは domain_check 引数で、書き手の文体は style_check 引数で差し込む｡
   文面を外部へ出力する直前、 .md を書き上げた直後に使う｡
   日誌・議事メモや個人 OSS の README には適用しない｡
@@ -22,7 +23,7 @@ md ドラフトの総合添削スキル｡ proofreader subagent で別コンテ�
 1. 書き手が [[japanese-tech-writing]] の Phase 3 self-check の項目 1〜6 を頭で点検する
 2. 通過したら、 self-check 項目 7 として本スキルを呼ぶ ([[japanese-tech-writing]] Phase 1.2 で判定した medium を渡す)
 3. 本スキルは proofreader subagent を dispatch し、 Tier 1/2/3 で分類された結果を return する
-4. 親 (呼び出し元) が Tier 1 を確認 → Tier 2 をレビュー → 必要なら Tier 3 を deep-dive
+4. 親 (呼び出し元) が Tier 2 を適用して報告する → ユーザーが必要なら Tier 3 を deep-dive
 
 呼び出し元は、文書を生成・投稿するスキル (wiki ページ作成、タスク起票など) と
 [[japanese-tech-writing]] の Phase 3.1 項目 7 である｡
@@ -111,26 +112,23 @@ Agent ツールで `proofreader` subagent を `subagent_type: japanese-writer:pr
 `file_path` / `medium` / `domain_check` / `style_check` と、Step 0 で得た `lint_result_path` を渡す｡
 `config_root` と `tmp_dir` は親が textlint 実行に使うもので、subagent へは渡さない｡
 
-### Step 2: return を Stage 1 で表示
+### Step 2: Stage 1 で Tier 2 を Edit 適用 + 報告
 
-詳細は `references/deep-dive-flow.md`｡
+Tier 2 は問い合わせずに全件適用し、 適用した前後と Tier 3 警告を報告する｡ ユーザーへ apply 対象を
+選ばせない｡ 戻したい ID はユーザーが報告後に `revert 2-N` で指示する｡ 詳細は `references/deep-dive-flow.md`｡
+
+修正は語の差し替えで済ませない｡指摘された語を含む文をまるごと書き直す｡語だけを替えると、
+同じ問題が形を変えて残る｡
+
+報告まで終えたら `rm "$lint_result_path"` で結果 JSON を片付ける｡消すのは Step 0 で本スキルが
+作ったファイルだけで、`tmp_dir` そのものは消さない｡ ここで proofread skill は終了する｡
 
 ### Step 3: Stage 1.5 (任意, ユーザー指示時のみ)
 
 ユーザーが `explore` を指示した場合のみ実行｡ proofreader を `mode="deep-dive"` で再 dispatch｡
 再 dispatch 時の引数: file_path / medium / mode="deep-dive" / target_warning_id (ユーザー指定の Tier 3 ID) / prior_findings (初回 scan の `tier3_warnings` 配列)｡ 詳細は `references/deep-dive-flow.md#stage-15` 参照｡
 
-### Step 4: Stage 2 で apply 対象受領
-
-### Step 5: Stage 3 で Edit 適用 + 報告
-
-修正は語の差し替えで済ませない｡指摘された語を含む文をまるごと書き直す｡語だけを替えると、
-同じ問題が形を変えて残る｡
-
-報告まで終えたら `rm "$lint_result_path"` で結果 JSON を片付ける｡消すのは Step 0 で本スキルが
-作ったファイルだけで、`tmp_dir` そのものは消さない｡
-
-### Step 6: 繰り返す指摘をルールへ移す
+### Step 4: 繰り返す指摘をルールへ移す
 
 同じ種類の指摘を 2 回以上受けたら、[[writing-feedback]] でルールとして登録する｡
 登録しない限り、次の文書でも同じ指摘が出る｡

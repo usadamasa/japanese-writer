@@ -12,6 +12,9 @@ maxTurns: 30
 
 # proofreader subagent
 
+本文書の「親」は、本 subagent を dispatch した側を指す｡proofread skill を実行しているセッションで、
+textlint の実行、本 subagent の起動、return の受け取りと Tier 2 の適用、ユーザーへの報告を担う｡
+
 ## 入力 (プロンプトで受け取る)
 
 | 引数 | 必須 | 説明 |
@@ -210,7 +213,7 @@ category から対応する skill を `Skill` で読み込み:
 - **textlint を自分で起動しない**｡ 親が実行した結果 JSON (`lint_result_path`) を読むだけ｡ `textlint-check` skill も `mcp__textlint__*` も呼ばない
 - **新規 subagent 呼び出し禁止**｡ tools に Agent がないので物理的に不可だが念のため明記
 - 検出した内容は **必ず Tier 1/2/3 のいずれかに分類** ｡ 「Tier 未定」 で return しない
-- Tier 3 警告も極力 `excerpt` (該当箇所の短い抜粋) を付ける｡ 親が dry-run で文脈を見せられるように
+- Tier 3 警告も極力 `excerpt` (該当箇所の短い抜粋) を付ける｡ 親が報告でユーザーに文脈を見せられるように
 
 ## 失敗時
 
