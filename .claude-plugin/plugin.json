@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "japanese-writer",
   "description": "日本語の技術文書を書く・校正するためのスキル群｡文書の構成と論証の規範、textlint による機械点検、proofreader subagent による総合添削、制作過程の痕跡の除去、指摘のルール化を扱う｡",
-  "version": "2026.0926.02",
+  "version": "2026.0926.03",
   "author": {
     "name": "usadamasa"
   },

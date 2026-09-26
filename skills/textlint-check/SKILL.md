@@ -114,11 +114,17 @@ TMP_MD=$(mktemp "${tmp_dir}/textlint-XXXXXX.md")
 ### Step 2: textlint を実行する
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/textlint-run.sh" \
+"${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh" \
   --config "$config" \
   --output "${tmp_dir}/textlint-result.json" \
   "$target_file"
 ```
+
+`textlint-run.sh` は `${CLAUDE_PLUGIN_ROOT}` ではなく `${CLAUDE_PLUGIN_DATA}` から呼ぶ。
+`CLAUDE_PLUGIN_ROOT` は plugin の version ごとにパスが変わり、sandbox の `excludedCommands` へ
+固定パスとして登録できないため、update を跨いで固定の `CLAUDE_PLUGIN_DATA` へ複製したものを使う
+(複製は `scripts/prepare-data.sh` が SessionStart hook で行う)。`--config` のパスは
+version ごとに変わってよいので、これまでどおりの解決方法でよい。
 
 `$config` は「config の解決」節のとおり決める｡`$target_file` は `file_path` 入力ならそのパス、
 `text` 入力なら Step 1 の `$TMP_MD`｡いずれも絶対パスで渡す｡
@@ -152,6 +158,7 @@ stdout のサマリから件数を読み、`lint_result_path` とあわせて返
 | 点検対象が無い / 絶対パスでない | `file_path` を見直す |
 | 出力先ディレクトリが無い | `tmp_dir` を作ってから呼ぶ |
 | textlint が JSON を返さない | stderr に textlint の出力がそのまま出る｡多くは config の rule 解決失敗 |
+| `${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh` が無い (exit 127, `No such file or directory`) | SessionStart hook がまだ準備していない｡`/japanese-writer:setup` を実行する |
 
 ## 同梱する config
 

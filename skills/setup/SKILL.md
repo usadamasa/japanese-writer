@@ -58,6 +58,7 @@ CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.
 
 - 前提コマンドの結果
 - `writing-gate` のパス (`${CLAUDE_PLUGIN_DATA}/bin/writing-gate`) と検証の結果
+- `textlint-run.sh` の複製先 (`${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh`)
 - crit のリンクの状態
 - plugin を更新しても再実行は要らないこと (次のセッションの開始時に hook が準備し直す)
 
