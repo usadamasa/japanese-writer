@@ -120,11 +120,8 @@ TMP_MD=$(mktemp "${tmp_dir}/textlint-XXXXXX.md")
   "$target_file"
 ```
 
-`textlint-run.sh` は `${CLAUDE_PLUGIN_ROOT}` ではなく `${CLAUDE_PLUGIN_DATA}` から呼ぶ。
-`CLAUDE_PLUGIN_ROOT` は plugin の version ごとにパスが変わり、sandbox の `excludedCommands` へ
-固定パスとして登録できないため、update を跨いで固定の `CLAUDE_PLUGIN_DATA` へ複製したものを使う
-(複製は `scripts/prepare-data.sh` が SessionStart hook で行う)。`--config` のパスは
-version ごとに変わってよいので、これまでどおりの解決方法でよい。
+`textlint-run.sh` は `${CLAUDE_PLUGIN_ROOT}` ではなく `${CLAUDE_PLUGIN_DATA}` から呼ぶ
+(複製は `scripts/prepare-data.sh` が SessionStart hook で行う)。
 
 `$config` は「config の解決」節のとおり決める｡`$target_file` は `file_path` 入力ならそのパス、
 `text` 入力なら Step 1 の `$TMP_MD`｡いずれも絶対パスで渡す｡
