@@ -40,7 +40,7 @@ fi
 BIN="$SCRIPT_DIR/../bin/writing-gate"
 if [ ! -x "$BIN" ]; then
   # 未ビルドだと文章のゲートが丸ごと無効になる。黙って通さず、その事実を報告する。
-  jq -cn --arg r "writing-gate が見つかりません｡文章の完了ゲートが無効な状態です｡writing-gate をビルドして hooks の隣の bin/ へ置いてください｡" \
+  jq -cn --arg r "writing-gate が見つかりません｡文章の完了ゲートが無効な状態です｡/japanese-writer:setup を実行して writing-gate をビルドしてください｡" \
     '{"decision":"block","reason":$r}'
   exit 0
 fi
