@@ -8,6 +8,9 @@
 # go の入力として go.mod と *.go と rules.json を複製する (stamp の計算対象)
 setup_plugin_tree() {
   WORKDIR=$(mktemp -d "${TMPDIR:-/tmp}/plugin-test.XXXXXX")
+  # TMPDIR が / で終わると // を含むパスになる。スクリプトは cd && pwd で正規化した
+  # パスを出すので、比べる側も揃えておく
+  WORKDIR=$(cd "$WORKDIR" && pwd)
   export WORKDIR
   SRC="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   ROOT="$WORKDIR/plugin"
@@ -22,6 +25,7 @@ setup_plugin_tree() {
   CLAUDE_PLUGIN_DATA="$WORKDIR/data"
   export CLAUDE_PLUGIN_DATA
   DATA="$CLAUDE_PLUGIN_DATA"
+  export DATA
 
   HOME="$WORKDIR/home"
   mkdir -p "$HOME"
@@ -30,8 +34,10 @@ setup_plugin_tree() {
   MOCK_PATH="$WORKDIR/mockbin"
   mkdir -p "$MOCK_PATH"
   # jq は本物を使う (結果 JSON の読み取りに要る)。ディレクトリごと PATH に足すと
-  # 同居する npx や crit まで見えてしまうので、jq だけを symlink で持ち込む
-  ln -s "$(command -v jq)" "$MOCK_PATH/jq"
+  # 同居する npx や crit まで見えてしまうので、jq だけを持ち込む。aqua の shim は
+  # 元の PATH が無いと本体を探せないため、symlink ではなく元の PATH で起動する wrapper にする
+  printf '#!/bin/bash\nPATH=%q exec jq "$@"\n' "$PATH" >"$MOCK_PATH/jq"
+  chmod +x "$MOCK_PATH/jq"
   PATH="$MOCK_PATH:/usr/bin:/bin"
   export PATH
 }
@@ -50,6 +56,7 @@ mock_cmd() {
 # mock_go [ERRORS] -> `go build -C ROOT -o OUT ./...` を受け、OUT/writing-gate に
 # scan の結果として errors=ERRORS の固定 JSON を返す偽バイナリを置く。OUT が相対なら ROOT から解決する。
 # 呼び出しは go.log に記録する。
+# shellcheck disable=SC2016 # 生成するスクリプトの中で展開させるため、$ はそのまま書き出す
 mock_go() {
   local errors="${1:-1}"
   {

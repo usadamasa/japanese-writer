@@ -1,6 +1,17 @@
 {
-  "description": "セッションを閉じるときに、編集した markdown を writing-gate で点検する",
+  "description": "セッションの開始時に writing-gate を plugin の data ディレクトリへ用意し、閉じるときに編集した markdown を点検する",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/session-start-prepare.sh\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

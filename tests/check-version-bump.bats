@@ -11,7 +11,6 @@ setup() {
   REPO="$WORKDIR/repo"
   mkdir -p "$REPO/.claude-plugin" "$REPO/skills/a" "$REPO/tests" "$REPO/.github/workflows" "$REPO/scripts"
   cp "$SRC/scripts/check-version-bump.sh" "$REPO/scripts/check-version-bump.sh"
-  SCRIPT_PATH="$REPO/scripts/check-version-bump.sh"
 
   export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
   git -C "$REPO" init -q -b main

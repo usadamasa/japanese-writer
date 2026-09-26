@@ -35,8 +35,8 @@ teardown_mock_bin() {
 }
 
 # hooks/ と空の bin/ を持つ隔離ツリーを作り、hooks ディレクトリのパスを stdout に返す。
-# hook は自分の ../bin/ のバイナリを絶対パスで起動するため、
-# 実リポジトリの bin/ を巻き込まずに未ビルド時の挙動をテストするのに使う。
+# 実リポジトリを巻き込まずに hook を走らせるのに使う。bin/ は plugin root 側のバイナリを
+# hook が使わないことを確かめるために置く。
 setup_fake_hooks_tree() {
   local root="$1"
   local src

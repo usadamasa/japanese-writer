@@ -9,7 +9,7 @@ tasks:
       - go build -o bin/ ./...
 
   test:
-    desc: Go のテストと bats を実行する｡bats は bin/writing-gate を使うので先にビルドする
+    desc: ビルドしてから Go のテストと bats を実行する
     cmds:
       - task: build
       - go test -race ./...
@@ -30,6 +30,11 @@ tasks:
     desc: シェルスクリプトと bats を shellcheck で点検する
     cmds:
       - find . \( -name '*.sh' -o -name '*.bats' -o -name '*.bash' \) -not -path './tmp/*' -not -path './.git/*' -print0 | xargs -0 shellcheck
+
+  bump:
+    desc: plugin.json の version を calver (YYYY.MMDD.NN) で 1 つ進める
+    cmds:
+      - ./scripts/bump-version.sh
 
   validate:
     desc: plugin の manifest と､JSON / YAML の schema を検証する

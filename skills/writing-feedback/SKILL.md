@@ -121,7 +121,7 @@ mkdir -p ./tmp && printf '%s\n' '<直したかった文>' > ./tmp/probe.md
   --output "$PWD/tmp/probe.json" "$PWD/tmp/probe.md"
 
 # writing-gate へ足した場合
-writing-gate scan ./tmp/probe.md
+"${CLAUDE_PLUGIN_DATA}/bin/writing-gate" scan ./tmp/probe.md
 ```
 
 ### Step 4: 誤検出を見積もる
@@ -138,7 +138,7 @@ xargs "${CLAUDE_PLUGIN_ROOT}/scripts/textlint-run.sh" \
 jq '[.remaining_issues[] | select(.message | startswith("<足したルールの prh 文言の先頭>"))] | length' ./tmp/all.json
 
 # writing-gate へ足した場合
-xargs writing-gate scan --format json < ./tmp/mdlist.txt \
+xargs "${CLAUDE_PLUGIN_DATA}/bin/writing-gate" scan --format json < ./tmp/mdlist.txt \
   | jq '[.findings[] | select(.rule_id == "<足した id>")] | length'
 ```
 
@@ -152,6 +152,7 @@ xargs writing-gate scan --format json < ./tmp/mdlist.txt \
 
 足したルールは、textlint-check の config と writing-gate を持つリポジトリでコミットする｡
 writing-gate の `rules.json` を変えたら再ビルドが要る｡埋め込みなので、ビルドしないと反映されない｡
+配布した版へは、利用者の次のセッションの開始時に SessionStart hook が入力の差分を見てビルドし直す｡
 
 そのリポジトリが今の cwd と違うときは、そのリポジトリを cwd にした別セッションを立てて作業する｡
 `git -C` や `cd` で書き込み系の git を向ける代用はしない｡`cd` は cwd の字面が合わず sandbox 内に
