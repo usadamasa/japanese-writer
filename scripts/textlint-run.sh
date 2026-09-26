@@ -4,7 +4,7 @@ set -euo pipefail
 # markdown を textlint で autofix し、残った指摘とあわせて 1 つの JSON にまとめる。
 #
 # textlint は指摘が残ると終了コード 1 を返す。「lint に失敗した」と「指摘が見つかった」を
-# 終了コードでは区別できないため、stdout が JSON として妥当かどうかで判定する。
+# 終了コードでは区別できないため、stdout が空でない JSON 配列かどうかで判定する。
 #
 # autofix 後にもう一度 lint するのは、--fix の remainingMessages が修正前の位置を持つため。
 # 呼び出し元 (proofreader subagent) は修正後のファイルを読むので、行番号を揃える必要がある。
@@ -129,17 +129,20 @@ WORK_DIR=$(mktemp -d "$output_dir/textlint-run-XXXXXX") || die "一時ディレ�
 trap 'rm -rf "$WORK_DIR"' EXIT
 
 # run_pass LABEL STDOUT_FILE CONFIG [EXTRA_FLAG...]
-#   textlint を 1 回走らせ、stdout が JSON として妥当かどうかで実行の成否を判定する。
+#   textlint を 1 回走らせ、stdout が空でない JSON 配列かどうかで実行の成否を判定する。
+#   jq empty は空文字列でも成功してしまい、書き込み権限エラーなどで stdout が
+#   空になった失敗を素通りさせるため、jq empty だけでは検知できない。
 run_pass() {
   local label="$1" out="$2" config="$3"
   shift 3
-  local err="$WORK_DIR/$label.err" status=0 parse_err
+  local err="$WORK_DIR/$label.err" status=0 verify_status=0 verify_err
 
   npx "${npx_args[@]}" --config "$config" "$@" "${TARGETS[@]}" >"$out" 2>"$err" || status=$?
 
-  if ! parse_err=$(jq empty "$out" 2>&1); then
+  verify_err=$(jq -e 'type == "array" and length > 0' "$out" 2>&1 >/dev/null) || verify_status=$?
+  if [ "$verify_status" -ne 0 ]; then
     printf 'textlint-run: textlint (%s) の実行に失敗しました (exit %s)\n' "$label" "$status" >&2
-    printf 'textlint-run: stdout が JSON ではありません: %s\n' "$parse_err" >&2
+    printf 'textlint-run: stdout が有効な結果ではありません: %s\n' "${verify_err:-空の出力}" >&2
     # textlint は設定エラーを stdout に書くことがあるので両方そのまま流す
     printf -- '--- textlint stdout ---\n' >&2
     cat "$out" >&2
