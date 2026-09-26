@@ -116,7 +116,7 @@ writing-gate の場合、`message` に何が問題かを、`guidance` にどう�
 ```bash
 # prh へ足した場合
 mkdir -p ./tmp && printf '%s\n' '<直したかった文>' > ./tmp/probe.md
-"${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh" \
+textlint-run.sh \
   --config "${CLAUDE_PLUGIN_ROOT}/skills/textlint-check/configs/base.textlintrc.json" \
   --output "$PWD/tmp/probe.json" "$PWD/tmp/probe.md"
 
@@ -132,7 +132,7 @@ mkdir -p ./tmp && printf '%s\n' '<直したかった文>' > ./tmp/probe.md
 git ls-files '*.md' > ./tmp/mdlist.txt
 
 # prh へ足した場合
-xargs "${CLAUDE_PLUGIN_DATA}/scripts/textlint-run.sh" \
+xargs textlint-run.sh \
   --config "${CLAUDE_PLUGIN_ROOT}/skills/textlint-check/configs/base.textlintrc.json" \
   --output "$PWD/tmp/all.json" < ./tmp/mdlist.txt
 jq '[.remaining_issues[] | select(.message | startswith("<足したルールの prh 文言の先頭>"))] | length' ./tmp/all.json
