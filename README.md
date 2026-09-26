@@ -47,17 +47,18 @@ writing-gate は文書全体の集計 (語尾の連続・文体の混在) と逐
 
 ## インストール
 
-Claude Code で次を実行する｡
+配布は marketplace `usadamasa` ([usadamasa/agents-marketplace](https://github.com/usadamasa/agents-marketplace))
+経由で行う｡Claude Code で次を実行する｡
 
 ```text
-/plugin marketplace add usadamasa/japanese-writer
-/plugin install japanese-writer@japanese-writer
+/plugin marketplace add usadamasa/agents-marketplace
+/plugin install japanese-writer@usadamasa
 ```
 
 ### セットアップ
 
 install したら続けて次を実行する｡前提コマンドを確かめ、Stop hook が起動する `bin/writing-gate` を
-install 先 (`~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/`) にビルドして、
+install 先 (`~/.claude/plugins/cache/usadamasa/japanese-writer/<version>/`) にビルドして、
 既知の漏出パターンを拾えることまで検証する｡
 
 ```text
@@ -75,7 +76,7 @@ install 先のディレクトリが変わって `bin/` が無くなるので、�
 スクリプトを実行する｡
 
 ```sh
-~/.claude/plugins/cache/japanese-writer/japanese-writer/<version>/scripts/setup.sh --crit
+~/.claude/plugins/cache/usadamasa/japanese-writer/<version>/scripts/setup.sh --crit
 ```
 
 リンク先はバージョンのディレクトリを含むので、plugin を更新したら `--crit` でもう一度張る｡
