@@ -121,9 +121,7 @@ textlint-run.sh \
 ```
 
 `textlint-run.sh` は plugin の `bin/` に同梱されており、Claude Code が `bin/` を Bash の PATH に
-足すため bare name で解決できる。クォート・絶対パス・`&&` での連結は付けない。付けると
-sandbox の `excludedCommands` (`textlint-run.sh *`) の照合から外れ、sandbox 内で動いて
-`.claude/skills/**` などへの `--fix` が EPERM で失敗する。
+足すため bare name で解決できる。クォート・絶対パス・`&&` での連結は付けない。
 
 `$config` は「config の解決」節のとおり決める｡`$target_file` は `file_path` 入力ならそのパス、
 `text` 入力なら Step 1 の `$TMP_MD`｡いずれも絶対パスで渡す｡
