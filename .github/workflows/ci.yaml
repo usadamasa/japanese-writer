@@ -161,7 +161,15 @@ jobs:
         run: ./scripts/check-version-bump.sh "origin/$BASE_REF"
 
   ci-status-check:
-    needs: [go-test, lint, plugin-validate, json-schema, bats-test, shellcheck, pinact, version-bump]
+    needs:
+      - go-test
+      - lint
+      - plugin-validate
+      - json-schema
+      - bats-test
+      - shellcheck
+      - pinact
+      - version-bump
     if: failure()
     runs-on: ubuntu-latest
     timeout-minutes: 10

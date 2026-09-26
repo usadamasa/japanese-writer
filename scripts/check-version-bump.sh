@@ -64,7 +64,7 @@ if [ "$head_version" = "$base_version" ]; then
   printf '  %s\n' "${distributed[@]}" >&2
   exit 1
 fi
-# calver は桁が固定なので文字列の大小が日付順になる。semver の base (0.x) はどの calver よりも小さい
+# calver は桁が固定なので文字列の大小が日付順になる
 if ! [[ "$head_version" > "$base_version" ]]; then
   die "version が $base_version から $head_version へ戻っています"
 fi

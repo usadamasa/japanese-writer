@@ -88,18 +88,6 @@ check() {
   [[ "$output" == *"YYYY.MMDD.NN"* ]]
 }
 
-@test "base が semver でも calver へ上げていれば通す" {
-  set_version "0.1.0"
-  commit "semver base"
-  git -C "$REPO" branch -f base
-  printf 'changed\n' >>"$REPO/skills/a/SKILL.md"
-  set_version "2026.0926.01"
-  commit "change"
-
-  check
-  [ "$status" -eq 0 ]
-}
-
 @test "base の ref を渡さなければ usage を出して exit 1 する" {
   run bash -c 'cd "$1" && ./scripts/check-version-bump.sh' _ "$REPO"
   [ "$status" -eq 1 ]

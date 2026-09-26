@@ -28,21 +28,13 @@ version() {
   jq -r '.version' "$MANIFEST"
 }
 
-@test "semver からは今日の 01 へ進める" {
-  write_manifest "0.1.0"
-
-  run "$SCRIPT_PATH" --date 2026-09-26
-  [ "$status" -eq 0 ]
-  [ "$(version)" = "2026.0926.01" ]
-  [[ "$output" == *"2026.0926.01"* ]]
-}
-
 @test "前日の版からは今日の 01 へ進める" {
   write_manifest "2026.0925.03"
 
   run "$SCRIPT_PATH" --date 2026-09-26
   [ "$status" -eq 0 ]
   [ "$(version)" = "2026.0926.01" ]
+  [[ "$output" == *"2026.0926.01"* ]]
 }
 
 @test "同じ日の版からは連番を 1 つ上げる" {
@@ -80,7 +72,7 @@ version() {
 }
 
 @test "version 以外のフィールドを保つ" {
-  write_manifest "0.1.0"
+  write_manifest "2026.0925.01"
 
   run "$SCRIPT_PATH" --date 2026-09-26
   [ "$status" -eq 0 ]
@@ -89,9 +81,9 @@ version() {
 }
 
 @test "不正な --date は書き換えずに exit 1 する" {
-  write_manifest "0.1.0"
+  write_manifest "2026.0925.01"
 
   run "$SCRIPT_PATH" --date 2026/09/26
   [ "$status" -eq 1 ]
-  [ "$(version)" = "0.1.0" ]
+  [ "$(version)" = "2026.0925.01" ]
 }
