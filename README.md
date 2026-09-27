@@ -84,33 +84,6 @@ SessionStart hook が新しい版に揃えるので、張るのは 1 回で済�
 以前の setup が張った、版ごとの置き場を指すリンクは `--crit` で data の複製へ張り替える｡
 指し先が消えたリンクも張り替え、それ以外の場所を指しているときは触らずに報告だけする｡
 
-## バージョン
-
-版は calver の `YYYY.MMDD.N` (例: `2026.0927.0`) で付け、[tagpr](https://github.com/Songmu/tagpr) が進める｡
-`main` に変更が入ると tagpr workflow が release PR を作り (開いていれば更新し)、`plugin.json` の `version` と
-`CHANGELOG.md` をそこで書き換える｡release PR を merge すると、同じ版の git tag と GitHub Release ができる｡
-Claude Code は `plugin.json` の `version` の文字列が変わったときだけ update を配るので、
-配布物を変える PR を merge したら release PR も merge する｡
-
-版は手で上げない｡tagpr は「最新の tag の版の文字列」を `plugin.json` の中で探して置き換えるので、
-手で上げると見つからず、release PR で版が進まなくなる｡
-
-設定は `.tagpr` にある｡tag に `v` は付けず、`plugin.json` の `version` と同じ文字列にしている｡
-
-### tagpr が動くための設定
-
-tagpr は GitHub App `usadamasa-tagpr` のトークンで動く｡`GITHUB_TOKEN` では release PR を作れず、
-作った PR やタグが他の workflow を起動しないため｡
-
-| 種類 | 名前 | 内容 |
-| ---- | ---- | ---- |
-| Variable | `TAGPR_CLIENT_ID` | GitHub App の Client ID |
-| Secret | `TAGPR_PRIVATE_KEY` | GitHub App の Private Key |
-
-リポジトリを新しく用意するときは、App をそのリポジトリにインストールし、Client ID を Variable に、
-Private Key を Secret に入れる｡
-App に必要な権限は Contents: Read & Write、Pull requests: Read & Write、Issues: Read の 3 つ｡
-
 ## 文体とドメイン用語の差し込み
 
 proofread は汎用の機械点検と文章規範だけを持つ｡書き手ごとの文体とドメイン固有の用語は、
