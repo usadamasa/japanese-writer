@@ -31,11 +31,6 @@ tasks:
     cmds:
       - find . \( -name '*.sh' -o -name '*.bats' -o -name '*.bash' \) -not -path './tmp/*' -not -path './.git/*' -print0 | xargs -0 shellcheck
 
-  bump:
-    desc: plugin.json の version を calver (YYYY.MMDD.NN) で 1 つ進める
-    cmds:
-      - ./scripts/bump-version.sh
-
   validate:
     desc: plugin の manifest と､JSON / YAML の schema を検証する
     cmds:

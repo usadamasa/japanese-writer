@@ -84,18 +84,6 @@ SessionStart hook が新しい版に揃えるので、張るのは 1 回で済�
 以前の setup が張った、版ごとの置き場を指すリンクは `--crit` で data の複製へ張り替える｡
 指し先が消えたリンクも張り替え、それ以外の場所を指しているときは触らずに報告だけする｡
 
-## バージョン
-
-版は calver の `YYYY.MMDD.NN` (例: `2026.0926.01`) で付ける｡Claude Code は `plugin.json` の
-`version` の文字列が変わったときだけ update を配るので、配布物を変える PR では版を上げる｡
-
-```sh
-task bump  # 今日の日付の版にする｡同じ日なら NN を 1 つ上げる
-```
-
-CI の `version bump` job は、配布物に差分があるのに版が base と同じ PR を落とす｡
-テスト・CI・開発用の設定だけの変更なら上げなくてよい｡
-
 ## 文体とドメイン用語の差し込み
 
 proofread は汎用の機械点検と文章規範だけを持つ｡書き手ごとの文体とドメイン固有の用語は、
@@ -135,7 +123,6 @@ CI と同じ確認は task で手元でも通せる｡
 | `task test` | ビルドしてから Go のテストと bats を実行する |
 | `task lint` | golangci-lint と shellcheck を実行する |
 | `task validate` | `claude plugin validate --strict` と､JSON / YAML が宣言した schema での検証を実行する |
-| `task bump` | `plugin.json` の version を calver で 1 つ進める |
 
 ## ライセンス
 

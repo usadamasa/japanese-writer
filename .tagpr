@@ -1,0 +1,9 @@
+# tagpr の設定 (git config 形式)｡https://github.com/Songmu/tagpr
+[tagpr]
+  releaseBranch = main
+  versionFile = .claude-plugin/plugin.json
+  # タグと plugin.json の version を同じ文字列にする
+  vPrefix = false
+  # 既存の版 YYYY.MMDD.NN を引き継ぐ｡MICRO はゼロ埋めしないので、次の版は 2026.0927.0 の形になる
+  calendarVersioning = YYYY.0M0D.MICRO
+  release = true
