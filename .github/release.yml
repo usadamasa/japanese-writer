@@ -1,0 +1,5 @@
+changelog:
+  exclude:
+    labels:
+      # tagpr の release PR 自体は release notes に載せない
+      - tagpr

@@ -86,15 +86,29 @@ SessionStart hook が新しい版に揃えるので、張るのは 1 回で済�
 
 ## バージョン
 
-版は calver の `YYYY.MMDD.NN` (例: `2026.0926.01`) で付ける｡Claude Code は `plugin.json` の
-`version` の文字列が変わったときだけ update を配るので、配布物を変える PR では版を上げる｡
+版は calver の `YYYY.MMDD.N` (例: `2026.0927.0`) で付け、[tagpr](https://github.com/Songmu/tagpr) が進める｡
+`main` に変更が入ると tagpr workflow が release PR を作り (開いていれば更新し)、`plugin.json` の `version` と
+`CHANGELOG.md` をそこで書き換える｡release PR を merge すると、同じ版の git tag と GitHub Release ができる｡
+Claude Code は `plugin.json` の `version` の文字列が変わったときだけ update を配るので、
+配布物を変える PR を merge したら release PR も merge する｡
 
-```sh
-task bump  # 今日の日付の版にする｡同じ日なら NN を 1 つ上げる
-```
+版は手で上げない｡tagpr は「最新の tag の版の文字列」を `plugin.json` の中で探して置き換えるので、
+手で上げると見つからず、release PR で版が進まなくなる｡
 
-CI の `version bump` job は、配布物に差分があるのに版が base と同じ PR を落とす｡
-テスト・CI・開発用の設定だけの変更なら上げなくてよい｡
+設定は `.tagpr` にある｡tag に `v` は付けず、`plugin.json` の `version` と同じ文字列にしている｡
+
+### tagpr が動くための設定
+
+tagpr は GitHub App `usadamasa-tagpr` のトークンで動く｡`GITHUB_TOKEN` では release PR を作れず、
+作った PR やタグが他の workflow を起動しないため｡
+
+| 種類 | 名前 | 内容 |
+| ---- | ---- | ---- |
+| Secret | `TAGPR_PRIVATE_KEY` | GitHub App の Private Key |
+
+App の Client ID は公開情報なので `.github/workflows/tagpr.yaml` に直接書いてあり、Variable は要らない｡
+リポジトリを新しく用意するときは、App をそのリポジトリにインストールし、Private Key を Secret に入れる｡
+App に必要な権限は Contents: Read & Write、Pull requests: Read & Write、Issues: Read の 3 つ｡
 
 ## 文体とドメイン用語の差し込み
 
@@ -135,7 +149,6 @@ CI と同じ確認は task で手元でも通せる｡
 | `task test` | ビルドしてから Go のテストと bats を実行する |
 | `task lint` | golangci-lint と shellcheck を実行する |
 | `task validate` | `claude plugin validate --strict` と､JSON / YAML が宣言した schema での検証を実行する |
-| `task bump` | `plugin.json` の version を calver で 1 つ進める |
 
 ## ライセンス
 
