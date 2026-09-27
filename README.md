@@ -104,10 +104,11 @@ tagpr は GitHub App `usadamasa-tagpr` のトークンで動く｡`GITHUB_TOKEN`
 
 | 種類 | 名前 | 内容 |
 | ---- | ---- | ---- |
+| Variable | `TAGPR_CLIENT_ID` | GitHub App の Client ID |
 | Secret | `TAGPR_PRIVATE_KEY` | GitHub App の Private Key |
 
-App の Client ID は公開情報なので `.github/workflows/tagpr.yaml` に直接書いてあり、Variable は要らない｡
-リポジトリを新しく用意するときは、App をそのリポジトリにインストールし、Private Key を Secret に入れる｡
+リポジトリを新しく用意するときは、App をそのリポジトリにインストールし、Client ID を Variable に、
+Private Key を Secret に入れる｡
 App に必要な権限は Contents: Read & Write、Pull requests: Read & Write、Issues: Read の 3 つ｡
 
 ## 文体とドメイン用語の差し込み
