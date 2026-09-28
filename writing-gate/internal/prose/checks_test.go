@@ -92,6 +92,24 @@ func TestCheckPhrases(t *testing.T) {
 			wantID: "process-leak",
 			want:   false,
 		},
+		{
+			name:   "動詞終止形の見出しを拾う",
+			src:    "## 使う\n",
+			wantID: "heading-verb-form",
+			want:   true,
+		},
+		{
+			name:   "名詞形の見出しは拾わない",
+			src:    "## 使い方\n",
+			wantID: "heading-verb-form",
+			want:   false,
+		},
+		{
+			name:   "見出し以外の同じ語尾は拾わない",
+			src:    "- 使う\n",
+			wantID: "heading-verb-form",
+			want:   false,
+		},
 	}
 
 	for _, tt := range tests {
