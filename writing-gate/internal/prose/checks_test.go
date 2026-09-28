@@ -110,6 +110,12 @@ func TestCheckPhrases(t *testing.T) {
 			wantID: "heading-verb-form",
 			want:   false,
 		},
+		{
+			name:   "手順を説明する長い見出しは拾わない",
+			src:    "## Step 1: スクリプトを実行する\n",
+			wantID: "heading-verb-form",
+			want:   false,
+		},
 	}
 
 	for _, tt := range tests {

@@ -22,6 +22,9 @@ type PhraseRule struct {
 	Guidance string   `json:"guidance"`
 	Patterns []string `json:"patterns"`
 	Regexps  []string `json:"regexps"`
+	// Kinds は適用対象の行種別 ("heading", "body", "list", "table")｡
+	// 空なら quote 以外の全行に当たる｡
+	Kinds []string `json:"kinds,omitempty"`
 
 	compiled []*regexp.Regexp
 }
@@ -135,6 +138,9 @@ func mergeOverride(rs *RuleSet, raw []byte) error {
 		}
 		if add.Severity != "" {
 			base.Severity = add.Severity
+		}
+		if len(add.Kinds) > 0 {
+			base.Kinds = add.Kinds
 		}
 	}
 
