@@ -98,7 +98,8 @@ prh に載せられないため、ここが分担の線になる｡
       "message": "何が問題か",
       "guidance": "どう直すか",
       "patterns": ["部分一致で拾う文字列"],
-      "regexps": ["Go の正規表現"]
+      "regexps": ["Go の正規表現"],
+      "kinds": ["heading"]
     }
   ],
   "metaphor_markers": ["いわば"],
@@ -125,6 +126,7 @@ prh に載せられないため、ここが分担の線になる｡
 - 同じ `id` の `phrase_rules` は `patterns` と `regexps` を追記する｡
   `message` / `guidance` / `severity` は非空なら差し替える｡
 - 未知の `id` は追加する｡
+- `kinds` は非空なら差し替える｡省略時は quote 以外の全行 (`body` / `heading` / `list` / `table`) に当たる｡
 - `metaphor_markers` は追記する｡
 - `aggregates` は現れたブロックだけ差し替える｡
 

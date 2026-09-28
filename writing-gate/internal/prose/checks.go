@@ -4,6 +4,7 @@ package prose
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -60,6 +61,9 @@ func checkPhrases(doc *Document, rs *rules.RuleSet) []Finding {
 			if ln.Kind == KindQuote {
 				continue
 			}
+			if len(rule.Kinds) > 0 && !slices.Contains(rule.Kinds, kindName(ln.Kind)) {
+				continue
+			}
 			text := cleanText(ln.Text)
 			if text == "" {
 				continue
@@ -74,6 +78,20 @@ func checkPhrases(doc *Document, rs *rules.RuleSet) []Finding {
 		}
 	}
 	return findings
+}
+
+// kindName は Kind を rule.Kinds が参照する文字列へ変換する｡
+func kindName(k LineKind) string {
+	switch k {
+	case KindHeading:
+		return "heading"
+	case KindList:
+		return "list"
+	case KindTable:
+		return "table"
+	default:
+		return "body"
+	}
 }
 
 // checkSentenceEndingRepeat は同じ語尾の文が段落内で連続していないかを見る｡
