@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026.0928.0](https://github.com/usadamasa/japanese-writer/compare/2026.0927.0...2026.0928.0) - 2026-09-28
+
+- 見出しの動詞終止形を検出する writing-gate ルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/20
+- docs(japanese-tech-writing): 技術的識別子は原語のまま書く規範を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/22
+
 ## [2026.0927.0](https://github.com/usadamasa/japanese-writer/compare/2026.0926.07...2026.0927.0) - 2026-09-27
 
 - feat(release): 版の更新を tagpr に任せる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/17
