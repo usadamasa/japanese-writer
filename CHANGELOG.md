@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.0929.0](https://github.com/usadamasa/japanese-writer/compare/2026.0928.0...2026.0929.0) - 2026-09-29
+
+- prh: crit レビューで直された言い回しをルール化する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/23
+
 ## [2026.0928.0](https://github.com/usadamasa/japanese-writer/compare/2026.0927.0...2026.0928.0) - 2026-09-28
 
 - 見出しの動詞終止形を検出する writing-gate ルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/20
