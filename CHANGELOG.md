@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.0930.0](https://github.com/usadamasa/japanese-writer/compare/2026.0929.0...2026.0930.0) - 2026-09-30
+
+- prh-prose.yml に「射程」の検出ルールを追加 by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/25
+
 ## [2026.0929.0](https://github.com/usadamasa/japanese-writer/compare/2026.0928.0...2026.0929.0) - 2026-09-29
 
 - prh: crit レビューで直された言い回しをルール化する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/23
