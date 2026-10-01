@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1001.0](https://github.com/usadamasa/japanese-writer/compare/2026.0930.0...2026.1001.0) - 2026-10-01
+
+- proofread の textlint を毎回実行し、Tier 1 を報告から外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/27
+
 ## [2026.0930.0](https://github.com/usadamasa/japanese-writer/compare/2026.0929.0...2026.0930.0) - 2026-09-30
 
 - prh-prose.yml に「射程」の検出ルールを追加 by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/25
