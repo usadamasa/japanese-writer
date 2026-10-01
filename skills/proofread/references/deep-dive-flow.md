@@ -14,10 +14,6 @@ Edit の失敗は F4 と同じ扱いにする (以降を止めず､ その ID �
 ```
 ✓ proofreader 完了 ({file_path})
 
-[Tier 1 自動適用: {tier1_applied 件数}]
-  - {rule}: {count} 件 (line {lines})
-  ...
-
 [Tier 2 適用: {適用件数} 件]
   [2-1] line {line} {category}
         前: {current}
