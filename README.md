@@ -124,6 +124,10 @@ CI と同じ確認は task で手元でも通せる｡
 | `task lint` | golangci-lint と shellcheck を実行する |
 | `task validate` | `claude plugin validate --strict` と､JSON / YAML が宣言した schema での検証を実行する |
 
+## 謝辞
+
+参考にした・翻案した skill・gist・書籍の一覧は [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) にある｡
+
 ## ライセンス
 
 MIT
