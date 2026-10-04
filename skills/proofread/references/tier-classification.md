@@ -16,7 +16,7 @@ proofreader は [[japanese-tech-writing]] の Phase 3 self-check の **subagent 
 | 修正内容 | 例 |
 |---------|-----|
 | textlint auto-fix 可能 rule | 二重否定の除去､ 冗長表現 (lint 結果の `applied_fixes` に入っているもの)､ 長音記号統一 |
-| タイポ・表記揺れ | 全角英数 → 半角､ 句読点の半角化 |
+| タイポ・表記揺れ | 全角英数 → 半角、 半角句読点 → 全角 |
 | **英文略号の和訳** (japanese-tech-writing Phase 2.9) | `e.g.` → 「例えば」 / `i.e.` → 「すなわち」 / `etc.` → 「など」 / `cf.` → 「参照: 」 |
 | **数字・日付表記の半角化** (japanese-tech-writing Phase 2.7) | 全角アラビア → 半角 / 「午前10時」 → 「10:00」 / 全角チルダ `～` → 波ダッシュ `〜` |
 | **リンクテキスト「こちら」「click here」検出** (japanese-tech-writing Phase 2.10) | grep ベース検出 → 提案差し替え (1 候補に絞れるなら Tier 1､複数候補なら Tier 2) |

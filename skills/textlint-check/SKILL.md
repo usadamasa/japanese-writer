@@ -2,7 +2,7 @@
 name: textlint-check
 description: >-
   textlint CLI による markdown の機械点検｡ ai っぽい表現と日本語悪文を検出・自動修正し、
-  半角句読点や英文略号といった表記ルールも prh で強制する｡
+  句読点の字種や英文略号といった表記ルールも prh で強制する｡
   文書の種類ごとにルールを切り替えられるよう、呼び出し元が config_root で `.textlintrc.json` を指定する｡
   docs 系リポジトリやノートの .md を編集した後、および文面を出力する直前に使う｡
   Slack 短文には適用しない｡
@@ -182,10 +182,16 @@ stdout のサマリから件数を読み､`lint_result_path` とあわせて返
 `textlint-run.sh` が `npx --package` で渡すルールパッケージと､config が参照する rule は
 対応している必要がある｡config に別の rule を足すときはスクリプトの `TEXTLINT_PACKAGES` にも足す｡
 
-## 半角句読点
+## 句読点は全角
 
-句読点は常に半角の「｡ ､」を使う｡全角の `。` `、` は `prh-notation.yml` が半角へ autofix する｡
-`ja-no-mixed-period` の `periodMark` も `"｡"` にしてあり､文末が句点以外で終わる文を検出する｡
+句読点は常に全角の「。、」を使う。半角の `｡` `､` は `prh-notation.yml` が全角へ autofix する。
+`ja-no-mixed-period` の `periodMark` も `"。"` で、文末が句点以外で終わる文を検出する。
+
+半角の句点は、文を単位に数えるルールが文の区切りとして扱わない。
+`sentence-length` は区切り文字を option で受けず、段落の終わりまでを 1 文として長さを測る。
+`no-doubled-joshi` も既定では句点をまたいだ助詞を重複に数える。
+autofix が先に全角へ揃えるため、lint pass は文ごとに数える。
+この組み合わせは `tests/textlint-config.bats` が実物の textlint で確かめる。
 
 新しい prh ルールは､置換先が文脈によらず一意に決まるなら `prh-notation.yml`､そうでなければ
 `prh-prose.yml` へ足す｡
@@ -201,6 +207,6 @@ stdout のサマリから件数を読み､`lint_result_path` とあわせて返
 - `configs/prh-prose.yml` の比喩動詞・前置きのフィラー・文末のラベル・定型の結びの検出は､
   nanaism の yomiyasu <https://github.com/nanaism/yomiyasu> の `scripts/yomiyasu_lint.py` と
   `references/slop-catalog.md` から一部を採り入れた｡検出する表現の選び方と､喩えの形を作る語を伴うものだけを
-  拾う絞り方は原典に従う｡パターンは半角句読点とである体に合わせて書き直し､指摘の文面は検出語の置換ではなく
+  拾う絞り方は原典に従う｡パターンは全角・半角どちらの句読点も受ける形と、である体に合わせて書き直し､指摘の文面は検出語の置換ではなく
   文ごとの書き直しを求める形にした｡原典の語彙リスト・減点スコア・太字と箇条書きの比率は採っていない｡
   - Copyright (c) 2026 nanaism｡MIT License <https://github.com/nanaism/yomiyasu/blob/main/LICENSE>

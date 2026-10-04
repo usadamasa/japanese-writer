@@ -7,8 +7,8 @@
     },
     "preset-ja-technical-writing": {
       "ja-no-mixed-period": {
-        "periodMark": "｡",
-        "allowPeriodMarks": ["｡", "．", "！", "？"],
+        "periodMark": "。",
+        "allowPeriodMarks": ["。", "．", "！", "？"],
         "allowEmojiAtEnd": true
       },
       "sentence-length": {
