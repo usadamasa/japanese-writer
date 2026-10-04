@@ -165,7 +165,7 @@ stdout のサマリから件数を読み､`lint_result_path` とあわせて返
 | `configs/base.textlintrc.json` | lint pass の config｡ai-writing preset + ja-technical-writing preset + prh 両方 |
 | `configs/fix.textlintrc.json` | autofix pass の config｡表記ゆれのルールと `prh-notation.yml` だけ |
 | `configs/prh-notation.yml` | 表記ゆれ ([[japanese-tech-writing]] Phase 2.7)｡autofix する |
-| `configs/prh-prose.yml` | 語・句レベルの NG 表現 (Phase 2.4 / 2.9 / 2.10 / 2.11 / 2.12)｡検出のみ |
+| `configs/prh-prose.yml` | 語・句レベルの NG 表現｡検出のみ |
 
 `base.textlintrc.json` の prh `rulePaths` は同じディレクトリの 2 つの yml を指す｡
 テンプレートをリポジトリへ持ち出すときは､prh ルールセットも一緒に置くか､`rulePaths` を
