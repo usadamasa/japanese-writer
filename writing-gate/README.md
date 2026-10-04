@@ -26,7 +26,8 @@ markdown の文章品質を機械点検する CLI｡Stop hook から起動して
 textlint が拾えないものだけを見る｡語彙・表記の点検は `proofread`
 (内側で textlint) の担当で、ここでは扱わない｡
 
-ルールごとの判定の範囲と設定は `docs/rules/<ルール ID>.md` にある｡
+集計と表示のルールは判定の範囲と設定を `docs/rules/<ルール ID>.md` に置く｡
+漏出フレーズは `internal/rules/rules.json` が正本で､共通の判定の範囲を [`docs/rules/phrase-rules.md`](docs/rules/phrase-rules.md) に置く｡
 
 ### 文書全体の集計
 
@@ -40,12 +41,11 @@ textlint が拾えないものだけを見る｡語彙・表記の点検は `pro
 
 | ルール ID | 検出するもの | 既定の severity |
 |----|----|----|
-| [`process-leak`](docs/rules/process-leak.md) | 制作過程の痕跡 | error |
-| [`pink-elephant`](docs/rules/pink-elephant.md) | 却下・削除した案の痕跡 | error |
-| [`inline-enumeration`](docs/rules/inline-enumeration.md) | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
+| `process-leak` | 制作過程の痕跡 | error |
+| `pink-elephant` | 却下・削除した案の痕跡 | error |
+| `inline-enumeration` | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
 
-引用行 (`>`) は他人の文なので対象外｡コードブロック・インラインコード・
-フロントマター・HTML コメントは解析前に落とす｡
+判定の範囲と設定のキーは [`docs/rules/phrase-rules.md`](docs/rules/phrase-rules.md) にある｡
 
 ### Markdown の表示
 
