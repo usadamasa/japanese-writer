@@ -25,6 +25,9 @@ setup_file() {
     '管理用のエンドポイントへ再読み込みの要求を送ったうえで､反映の完了を応答の本文に含まれる世代番号と照らし合わせて確かめる必要がある｡' \
     >"$dir/one-sentence.md"
 
+  # 文をまたいで同じ助詞が並ぶ。文ごとに見れば重複は無い
+  printf '# doc\n\n朝に起きる｡夜に寝る｡\n' >"$dir/joshi-across.md"
+
   "$REPO_ROOT/bin/textlint-run.sh" \
     --config "$REPO_ROOT/skills/textlint-check/configs/base.textlintrc.json" \
     --output "$RESULT" \
@@ -52,6 +55,12 @@ count_issues() {
 
 @test "sentence-length は 2 文の段落を 1 文として数えない" {
   run count_issues two-sentences.md ja-technical-writing/sentence-length
+  [ "$status" -eq 0 ]
+  [ "$output" = "0" ]
+}
+
+@test "no-doubled-joshi は句点をまたいだ助詞を重複に数えない" {
+  run count_issues joshi-across.md ja-technical-writing/no-doubled-joshi
   [ "$status" -eq 0 ]
   [ "$output" = "0" ]
 }
