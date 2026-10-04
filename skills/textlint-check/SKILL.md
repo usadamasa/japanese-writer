@@ -165,7 +165,7 @@ stdout のサマリから件数を読み､`lint_result_path` とあわせて返
 | `configs/base.textlintrc.json` | lint pass の config｡ai-writing preset + ja-technical-writing preset + prh 両方 |
 | `configs/fix.textlintrc.json` | autofix pass の config｡表記ゆれのルールと `prh-notation.yml` だけ |
 | `configs/prh-notation.yml` | 表記ゆれ ([[japanese-tech-writing]] Phase 2.7)｡autofix する |
-| `configs/prh-prose.yml` | 語・句レベルの NG 表現 (Phase 2.4 / 2.9 / 2.10)｡検出のみ |
+| `configs/prh-prose.yml` | 語・句レベルの NG 表現 (Phase 2.4 / 2.9 / 2.10 / 2.11 / 2.12)｡検出のみ |
 
 `base.textlintrc.json` の prh `rulePaths` は同じディレクトリの 2 つの yml を指す｡
 テンプレートをリポジトリへ持ち出すときは､prh ルールセットも一緒に置くか､`rulePaths` を
@@ -195,3 +195,12 @@ stdout のサマリから件数を読み､`lint_result_path` とあわせて返
 - `config_root` の `.textlintrc.json` を編集すると､その配下の全 `.md` の lint に影響する｡変更前に影響範囲を確認する｡
 - autofix は対象ファイルをその場で書き換える｡未コミットの変更を失いたくないなら､呼ぶ前に commit するか `git stash` する｡
 - Slack 短文は textlint の対象外｡呼び出し自体を行わない｡
+
+## 出典
+
+- `configs/prh-prose.yml` の比喩動詞・前置きのフィラー・文末のラベル・定型の結びの検出は､
+  nanaism の yomiyasu <https://github.com/nanaism/yomiyasu> の `scripts/yomiyasu_lint.py` と
+  `references/slop-catalog.md` から一部を採り入れた｡検出する表現の選び方と､喩えの形を作る語を伴うものだけを
+  拾う絞り方は原典に従う｡パターンは半角句読点とである体に合わせて書き直し､指摘の文面は検出語の置換ではなく
+  文ごとの書き直しを求める形にした｡原典の語彙リスト・減点スコア・太字と箇条書きの比率は採っていない｡
+  - Copyright (c) 2026 nanaism｡MIT License <https://github.com/nanaism/yomiyasu/blob/main/LICENSE>
