@@ -54,6 +54,9 @@ func TestLoadRulesEmbedded(t *testing.T) {
 	if !rs.Aggregates.SentenceEndingRepeat.Enabled {
 		t.Error("sentence_ending_repeat が無効になっている")
 	}
+	if b := rs.Aggregates.BoldNotRendered; !b.Enabled || b.Severity == "" {
+		t.Errorf("bold_not_rendered の設定が不足している: %+v", b)
+	}
 }
 
 func TestPhraseRuleMatches(t *testing.T) {
@@ -148,6 +151,18 @@ func TestLoadRulesOverride(t *testing.T) {
 		}
 		if !rs.Aggregates.SentenceEndingRepeat.Enabled {
 			t.Error("指定していないブロックまで差し替わっている")
+		}
+	})
+
+	t.Run("太字の表示崩れのブロックを差し替える", func(t *testing.T) {
+		path := writeTestFile(t, dir, "bold.json",
+			`{"aggregates":{"bold_not_rendered":{"enabled":true,"severity":"warn"}}}`)
+		rs, err := LoadRules(path)
+		if err != nil {
+			t.Fatalf("LoadRules: %v", err)
+		}
+		if rs.Aggregates.BoldNotRendered.Severity != "warn" {
+			t.Errorf("Severity = %q, want warn", rs.Aggregates.BoldNotRendered.Severity)
 		}
 	})
 
