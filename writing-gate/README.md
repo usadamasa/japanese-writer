@@ -10,7 +10,7 @@
 markdown の文章品質を機械点検する CLI｡Stop hook から起動して、そのセッションで
 書いた `.md` に重大な指摘が残っていれば完了をブロックする｡
 
-設計・ルール・運用はこのファイルにある｡
+設計と運用はこのファイルに､ルールごとの詳細は `docs/rules/` にある｡
 
 ## なぜ要るか
 
@@ -26,36 +26,23 @@ markdown の文章品質を機械点検する CLI｡Stop hook から起動して
 textlint が拾えないものだけを見る｡語彙・表記の点検は `proofread`
 (内側で textlint) の担当で、ここでは扱わない｡
 
+ルールごとの判定の範囲と設定は `docs/rules/<ルール ID>.md` にある｡
+
 ### 文書全体の集計
 
 | ルール ID | 検出するもの | 既定の severity |
 |----|----|----|
-| `sentence-ending-repeat` | 同じ語尾の文が段落内で 3 文以上続く | error |
-| `style-mix` | である体とですます体が混ざっている | error |
-| `metaphor-repeat` | 比喩の目印が 3 箇所以上ある | warn |
-
-判定の範囲を絞ってある｡
-
-- `sentence-ending-repeat` は本文の段落だけを見る｡箇条書きの語尾が揃うのは
-  規範上むしろ推奨されるため (`japanese-tech-writing` Phase 2.8)｡
-- 段落 (空行と非本文行で区切る) をまたいだ連続は数えない｡見出しを挟んだ「連続」は
-  読み手に連続として届かない｡
-- 語尾がひらがなで終わらない行は数えない｡語彙の列挙や記号の並びを拾ってしまうため｡
-- `style-mix` は引用・見出し・表を除く｡少数派の文を最大 5 件まで挙げる｡
-- 丁寧語の「ます」は連用形 (い段・え段) に付く｡直前がそれ以外なら本動詞なので
-  ですます体として数えない (「済ます」「励ます」)｡
+| [`sentence-ending-repeat`](docs/rules/sentence-ending-repeat.md) | 同じ語尾の文が段落内で 3 文以上続く | error |
+| [`style-mix`](docs/rules/style-mix.md) | である体とですます体が混ざっている | error |
+| [`metaphor-repeat`](docs/rules/metaphor-repeat.md) | 比喩の目印が 3 箇所以上ある | warn |
 
 ### 漏出フレーズ
 
 | ルール ID | 検出するもの | 既定の severity |
 |----|----|----|
-| `process-leak` | 制作過程の痕跡 | error |
-| `pink-elephant` | 却下・削除した案の痕跡 | error |
-| `inline-enumeration` | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
-
-パターンの正本は `sanitize-artifacts` skill の「検出対象」表｡こちらはそのうち
-逐語で拾えるものを機械化したもの｡意味・注意配分・視覚の層は機械では拾えないため、
-同 skill の点検が別に要る｡
+| [`process-leak`](docs/rules/process-leak.md) | 制作過程の痕跡 | error |
+| [`pink-elephant`](docs/rules/pink-elephant.md) | 却下・削除した案の痕跡 | error |
+| [`inline-enumeration`](docs/rules/inline-enumeration.md) | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
 
 引用行 (`>`) は他人の文なので対象外｡コードブロック・インラインコード・
 フロントマター・HTML コメントは解析前に落とす｡
@@ -64,31 +51,7 @@ textlint が拾えないものだけを見る｡語彙・表記の点検は `pro
 
 | ルール ID | 検出するもの | 既定の severity |
 |----|----|----|
-| `bold-not-rendered` | GitHub などで太字として表示されず､`**` がそのまま見える書き方 | error |
-
-`**` のすぐ内側が記号で､すぐ外側が文字だと､`**` は太字の印として読まれない｡
-`次に**「文書の立場」**を決める` は `**` ごと表示される｡文章の癖ではなく表示の不具合なので､読み手にそのまま見える｡
-
-判定の範囲:
-
-- CommonMark と GFM の両方で太字になる形だけを､表示されるとみなす｡CommonMark は Unicode の P と S を記号として扱い､
-  GFM は ASCII の記号と Unicode の P を記号として扱う｡半角の「｡､」は P なので記号に入る
-- `**` の組は段落・リスト項目・見出し・表の行の中だけで探す｡空行・フェンス・区切り線・引用の深さの変化をまたいで組まない
-- 引用行も対象にする｡他人の文でも､表示が崩れるのは読み手に見えるため
-- コードブロック・インラインコード・HTML で始まる行・フロントマター・エスケープした `\*\*` は見ない
-
-直し方の案は次の順に試し､直した結果が太字として表示されるものを出す｡どれも当たらなければ「手で直す」と出す｡
-
-1. かっこごと太字にしているなら､かっこの内側だけを太字にする (`「**文書の立場**」`)
-2. 太字の終わりが句読点なら､句読点を太字の外へ出す (`**必須です**｡`)
-3. `**` の内側に空白があれば取る (`** 重要 **` → `**重要**`)
-4. それでも足りなければ､`**` の外側の文字に接する側へ半角スペースを入れる
-
-判定と直し方は yomiyasu の `bold_problems` を移植したもの (「出典」節)｡原典と違う点が 2 つある｡
-
-- 2 の句読点に半角の「｡､」を足した｡このリポジトリの表記ルールでは句読点を半角で書くため
-- 行末の `\` の次の行頭にある `**` をエスケープとみなさない｡CommonMark では行末の `\` は改行であって､
-  次の行の文字をエスケープしない
+| [`bold-not-rendered`](docs/rules/bold-not-rendered.md) | GitHub などで太字として表示されず､`**` がそのまま見える書き方 | error |
 
 ## 使い方
 
@@ -249,8 +212,6 @@ xargs ./bin/writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings
 - 漏出の検出は逐語だけ｡言い換え・上位語・図やラベルへの漏れは拾えない｡
 - 文体の判定は文末の形だけを見る｡体言止めはどちらにも数えない｡
 - 判定は日本語の文にしか当てない｡英文は語尾と文体の判定から外れる｡
-- `bold-not-rendered` が飛ばす HTML は `<` で始まる行だけ｡複数行の HTML コメントの 2 行目以降は段落として読む｡
-
 ## 出典
 
 - 執筆後の別の層で機械点検し､検出語の置換ではなく文ごと書き直させる設計は
@@ -258,5 +219,5 @@ xargs ./bin/writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings
 - 却下案の痕跡を漏出として拾う考え方は <https://x.com/Kashiko_AIart/status/2091137586991645101> を翻案した｡
 - `bold-not-rendered` の判定と直し方の案は､nanaism の yomiyasu <https://github.com/nanaism/yomiyasu> (MIT) の
   `scripts/yomiyasu_lint.py` にある `bold_not_rendered` を Go へ移植した｡著作権表示とライセンス文は
-  `internal/prose/bold.go` の冒頭に残した｡テストの入力 `internal/prose/testdata/bold_regressions.json` は
-  原典の `tests/fixtures/bold_regressions.json` の複写で､ライセンス文を同じ場所の `LICENSE.yomiyasu` に置いた｡
+  `internal/prose/bold.go` の冒頭に残した｡`internal/prose/bold_test.go` の回帰ケースの表は原典の
+  `tests/fixtures/bold_regressions.json` を table test へ移したもので､同じ表示を冒頭に置いた｡
