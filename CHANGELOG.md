@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026.1004.0](https://github.com/usadamasa/japanese-writer/compare/2026.0930.0...2026.1004.0) - 2026-10-04
+
+- proofread の textlint を毎回実行し、Tier 1 を報告から外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/27
+- docs: 参考にした外部の資料を ACKNOWLEDGMENTS.md にまとめる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/29
+- prh-prose に比喩動詞と前置きのフィラーの検出を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/36
+- writing-gate: 太字として表示されない ** を bold-not-rendered で検出する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/38
+- fix(textlint-check)!: 句読点を全角へ揃え、文長の誤検出を直す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/41
+
 ## [2026.0930.0](https://github.com/usadamasa/japanese-writer/compare/2026.0929.0...2026.0930.0) - 2026-09-30
 
 - prh-prose.yml に「射程」の検出ルールを追加 by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/25
