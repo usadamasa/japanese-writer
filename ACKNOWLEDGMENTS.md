@@ -13,7 +13,7 @@
 | kotek-7/dotfiles の sanitize-artifacts <https://github.com/kotek-7/dotfiles/blob/main/dot_agents/skills/sanitize-artifacts/SKILL.md> | skill | [sanitize-artifacts](skills/sanitize-artifacts/SKILL.md) | 日本語文書向けに翻案 | 表記なし |
 | @Kashiko_AIart の投稿 <https://x.com/Kashiko_AIart/status/2091137586991645101> | X の投稿 | [sanitize-artifacts](skills/sanitize-artifacts/SKILL.md) の「却下した案の扱い (ピンクの象)」節､[writing-gate](writing-gate/README.md) の却下案の痕跡の検出 | 翻案 | - |
 | @yugen_matuni の投稿 <https://x.com/yugen_matuni/status/2088251220452679951> | X の投稿 | [writing-feedback](skills/writing-feedback/SKILL.md)､[writing-gate](writing-gate/README.md) と Stop hook (執筆後の機械点検の層) | 翻案 | - |
-| nanaism の skill (yomiyasu) <https://github.com/nanaism/yomiyasu> | skill | [textlint-check](skills/textlint-check/SKILL.md) の prh ルール (比喩動詞・前置きのフィラー・定型の結びの検出) | 一部採用 | MIT |
+| nanaism の skill (yomiyasu) <https://github.com/nanaism/yomiyasu> | skill | [textlint-check](skills/textlint-check/SKILL.md) の prh ルール (比喩動詞・前置きのフィラー・定型の結びの検出)､[writing-gate](writing-gate/README.md) の `bold-not-rendered` (太字として表示されない `**` の検出) | 一部採用､writing-gate は移植 | MIT |
 
 ## 書籍・公的資料
 

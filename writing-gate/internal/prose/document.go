@@ -39,7 +39,10 @@ type Sentence struct {
 
 // Document は markdown を解析した結果｡
 type Document struct {
-	Path      string
+	Path string
+	// Source は解析前の本文｡太字の判定はインラインコードやコンテナの記号を
+	// 自前で読むため、除去済みの Lines では足りない｡
+	Source    string
 	Lines     []Line
 	Sentences []Sentence
 	// DisabledRules は `<!-- writing-gate-disable [rule-id ...] -->` で無効化された
@@ -65,7 +68,7 @@ var (
 // コードブロック・フロントマター・インラインコード・HTML コメントは除去する｡
 // これらを残すと、サンプルコードやルールの説明そのものが検出対象になる｡
 func ParseDocument(path, src string) *Document {
-	doc := &Document{Path: path, DisabledRules: map[string]bool{}}
+	doc := &Document{Path: path, Source: src, DisabledRules: map[string]bool{}}
 	doc.readDisableMarkers(src)
 
 	raw := strings.Split(src, "\n")

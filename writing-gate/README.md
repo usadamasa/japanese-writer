@@ -60,6 +60,36 @@ textlint が拾えないものだけを見る｡語彙・表記の点検は `pro
 引用行 (`>`) は他人の文なので対象外｡コードブロック・インラインコード・
 フロントマター・HTML コメントは解析前に落とす｡
 
+### Markdown の表示
+
+| ルール ID | 検出するもの | 既定の severity |
+|----|----|----|
+| `bold-not-rendered` | GitHub などで太字として表示されず､`**` がそのまま見える書き方 | error |
+
+`**` のすぐ内側が記号で､すぐ外側が文字だと､`**` は太字の印として読まれない｡
+`次に**「文書の立場」**を決める` は `**` ごと表示される｡文章の癖ではなく表示の不具合なので､読み手にそのまま見える｡
+
+判定の範囲:
+
+- CommonMark と GFM の両方で太字になる形だけを､表示されるとみなす｡CommonMark は Unicode の P と S を記号として扱い､
+  GFM は ASCII の記号と Unicode の P を記号として扱う｡半角の「｡､」は P なので記号に入る
+- `**` の組は段落・リスト項目・見出し・表の行の中だけで探す｡空行・フェンス・区切り線・引用の深さの変化をまたいで組まない
+- 引用行も対象にする｡他人の文でも､表示が崩れるのは読み手に見えるため
+- コードブロック・インラインコード・HTML で始まる行・フロントマター・エスケープした `\*\*` は見ない
+
+直し方の案は次の順に試し､直した結果が太字として表示されるものを出す｡どれも当たらなければ「手で直す」と出す｡
+
+1. かっこごと太字にしているなら､かっこの内側だけを太字にする (`「**文書の立場**」`)
+2. 太字の終わりが句読点なら､句読点を太字の外へ出す (`**必須です**｡`)
+3. `**` の内側に空白があれば取る (`** 重要 **` → `**重要**`)
+4. それでも足りなければ､`**` の外側の文字に接する側へ半角スペースを入れる
+
+判定と直し方は yomiyasu の `bold_problems` を移植したもの (「出典」節)｡原典と違う点が 2 つある｡
+
+- 2 の句読点に半角の「｡､」を足した｡このリポジトリの表記ルールでは句読点を半角で書くため
+- 行末の `\` の次の行頭にある `**` をエスケープとみなさない｡CommonMark では行末の `\` は改行であって､
+  次の行の文字をエスケープしない
+
 ## 使い方
 
 ```sh
@@ -109,7 +139,8 @@ prh に載せられないため、ここが分担の線になる｡
       "min_run": 3, "suffix_runes": 3, "min_sentence_runes": 6
     },
     "style_mix": { "enabled": true, "severity": "error", "min_sentences": 5, "max_examples": 5 },
-    "metaphor_repeat": { "enabled": true, "severity": "warn", "min_count": 3 }
+    "metaphor_repeat": { "enabled": true, "severity": "warn", "min_count": 3 },
+    "bold_not_rendered": { "enabled": true, "severity": "error" }
   }
 }
 ```
@@ -218,9 +249,14 @@ xargs ./bin/writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings
 - 漏出の検出は逐語だけ｡言い換え・上位語・図やラベルへの漏れは拾えない｡
 - 文体の判定は文末の形だけを見る｡体言止めはどちらにも数えない｡
 - 判定は日本語の文にしか当てない｡英文は語尾と文体の判定から外れる｡
+- `bold-not-rendered` が飛ばす HTML は `<` で始まる行だけ｡複数行の HTML コメントの 2 行目以降は段落として読む｡
 
 ## 出典
 
 - 執筆後の別の層で機械点検し､検出語の置換ではなく文ごと書き直させる設計は
   <https://x.com/yugen_matuni/status/2088251220452679951> を翻案した｡
 - 却下案の痕跡を漏出として拾う考え方は <https://x.com/Kashiko_AIart/status/2091137586991645101> を翻案した｡
+- `bold-not-rendered` の判定と直し方の案は､nanaism の yomiyasu <https://github.com/nanaism/yomiyasu> (MIT) の
+  `scripts/yomiyasu_lint.py` にある `bold_not_rendered` を Go へ移植した｡著作権表示とライセンス文は
+  `internal/prose/bold.go` の冒頭に残した｡テストの入力 `internal/prose/testdata/bold_regressions.json` は
+  原典の `tests/fixtures/bold_regressions.json` の複写で､ライセンス文を同じ場所の `LICENSE.yomiyasu` に置いた｡

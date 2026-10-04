@@ -52,6 +52,7 @@ type Aggregates struct {
 	SentenceEndingRepeat AggregateRule `json:"sentence_ending_repeat"`
 	StyleMix             AggregateRule `json:"style_mix"`
 	MetaphorRepeat       AggregateRule `json:"metaphor_repeat"`
+	BoldNotRendered      AggregateRule `json:"bold_not_rendered"`
 }
 
 // RuleSet は writing-gate が適用するルール一式｡
@@ -105,6 +106,7 @@ type overrideFile struct {
 		SentenceEndingRepeat *AggregateRule `json:"sentence_ending_repeat"`
 		StyleMix             *AggregateRule `json:"style_mix"`
 		MetaphorRepeat       *AggregateRule `json:"metaphor_repeat"`
+		BoldNotRendered      *AggregateRule `json:"bold_not_rendered"`
 	} `json:"aggregates"`
 }
 
@@ -155,6 +157,9 @@ func mergeOverride(rs *RuleSet, raw []byte) error {
 		}
 		if a := ov.Aggregates.MetaphorRepeat; a != nil {
 			rs.Aggregates.MetaphorRepeat = *a
+		}
+		if a := ov.Aggregates.BoldNotRendered; a != nil {
+			rs.Aggregates.BoldNotRendered = *a
 		}
 	}
 	return nil
