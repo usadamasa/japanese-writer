@@ -10,7 +10,7 @@
 markdown の文章品質を機械点検する CLI｡Stop hook から起動して、そのセッションで
 書いた `.md` に重大な指摘が残っていれば完了をブロックする｡
 
-設計・ルール・運用はこのファイルにある｡
+設計と運用はこのファイルに､ルールごとの詳細は `docs/rules/` にある｡
 
 ## なぜ要るか
 
@@ -26,24 +26,16 @@ markdown の文章品質を機械点検する CLI｡Stop hook から起動して
 textlint が拾えないものだけを見る｡語彙・表記の点検は `proofread`
 (内側で textlint) の担当で、ここでは扱わない｡
 
+集計と表示のルールは判定の範囲と設定を `docs/rules/<ルール ID>.md` に置く｡
+漏出フレーズは `internal/rules/rules.json` が正本で､共通の判定の範囲を [`docs/rules/phrase-rules.md`](docs/rules/phrase-rules.md) に置く｡
+
 ### 文書全体の集計
 
 | ルール ID | 検出するもの | 既定の severity |
 |----|----|----|
-| `sentence-ending-repeat` | 同じ語尾の文が段落内で 3 文以上続く | error |
-| `style-mix` | である体とですます体が混ざっている | error |
-| `metaphor-repeat` | 比喩の目印が 3 箇所以上ある | warn |
-
-判定の範囲を絞ってある｡
-
-- `sentence-ending-repeat` は本文の段落だけを見る｡箇条書きの語尾が揃うのは
-  規範上むしろ推奨されるため (`japanese-tech-writing` Phase 2.8)｡
-- 段落 (空行と非本文行で区切る) をまたいだ連続は数えない｡見出しを挟んだ「連続」は
-  読み手に連続として届かない｡
-- 語尾がひらがなで終わらない行は数えない｡語彙の列挙や記号の並びを拾ってしまうため｡
-- `style-mix` は引用・見出し・表を除く｡少数派の文を最大 5 件まで挙げる｡
-- 丁寧語の「ます」は連用形 (い段・え段) に付く｡直前がそれ以外なら本動詞なので
-  ですます体として数えない (「済ます」「励ます」)｡
+| [`sentence-ending-repeat`](docs/rules/sentence-ending-repeat.md) | 同じ語尾の文が段落内で 3 文以上続く | error |
+| [`style-mix`](docs/rules/style-mix.md) | である体とですます体が混ざっている | error |
+| [`metaphor-repeat`](docs/rules/metaphor-repeat.md) | 比喩の目印が 3 箇所以上ある | warn |
 
 ### 漏出フレーズ
 
@@ -53,12 +45,13 @@ textlint が拾えないものだけを見る｡語彙・表記の点検は `pro
 | `pink-elephant` | 却下・削除した案の痕跡 | error |
 | `inline-enumeration` | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
 
-パターンの正本は `sanitize-artifacts` skill の「検出対象」表｡こちらはそのうち
-逐語で拾えるものを機械化したもの｡意味・注意配分・視覚の層は機械では拾えないため、
-同 skill の点検が別に要る｡
+判定の範囲と設定のキーは [`docs/rules/phrase-rules.md`](docs/rules/phrase-rules.md) にある｡
 
-引用行 (`>`) は他人の文なので対象外｡コードブロック・インラインコード・
-フロントマター・HTML コメントは解析前に落とす｡
+### Markdown の表示
+
+| ルール ID | 検出するもの | 既定の severity |
+|----|----|----|
+| [`bold-not-rendered`](docs/rules/bold-not-rendered.md) | GitHub などで太字として表示されず､`**` がそのまま見える書き方 | error |
 
 ## 使い方
 
@@ -109,7 +102,8 @@ prh に載せられないため、ここが分担の線になる｡
       "min_run": 3, "suffix_runes": 3, "min_sentence_runes": 6
     },
     "style_mix": { "enabled": true, "severity": "error", "min_sentences": 5, "max_examples": 5 },
-    "metaphor_repeat": { "enabled": true, "severity": "warn", "min_count": 3 }
+    "metaphor_repeat": { "enabled": true, "severity": "warn", "min_count": 3 },
+    "bold_not_rendered": { "enabled": true, "severity": "error" }
   }
 }
 ```
@@ -218,9 +212,12 @@ xargs ./bin/writing-gate scan --format json < ./tmp/l.txt | jq '{errors,warnings
 - 漏出の検出は逐語だけ｡言い換え・上位語・図やラベルへの漏れは拾えない｡
 - 文体の判定は文末の形だけを見る｡体言止めはどちらにも数えない｡
 - 判定は日本語の文にしか当てない｡英文は語尾と文体の判定から外れる｡
-
 ## 出典
 
 - 執筆後の別の層で機械点検し､検出語の置換ではなく文ごと書き直させる設計は
   <https://x.com/yugen_matuni/status/2088251220452679951> を翻案した｡
 - 却下案の痕跡を漏出として拾う考え方は <https://x.com/Kashiko_AIart/status/2091137586991645101> を翻案した｡
+- `bold-not-rendered` の判定と直し方の案は､nanaism の yomiyasu <https://github.com/nanaism/yomiyasu> (MIT) の
+  `scripts/yomiyasu_lint.py` にある `bold_not_rendered` を Go へ移植した｡著作権表示とライセンス文は
+  `internal/prose/bold.go` の冒頭に残した｡`internal/prose/bold_test.go` の回帰ケースの表は原典の
+  `tests/fixtures/bold_regressions.json` を table test へ移したもので､同じ表示を冒頭に置いた｡

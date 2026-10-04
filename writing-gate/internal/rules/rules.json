@@ -169,6 +169,10 @@
       "enabled": true,
       "severity": "warn",
       "min_count": 3
+    },
+    "bold_not_rendered": {
+      "enabled": true,
+      "severity": "error"
     }
   }
 }

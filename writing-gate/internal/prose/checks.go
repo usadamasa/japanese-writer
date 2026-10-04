@@ -39,6 +39,7 @@ func Check(doc *Document, rs *rules.RuleSet) []Finding {
 	findings = append(findings, checkSentenceEndingRepeat(doc, rs)...)
 	findings = append(findings, checkStyleMix(doc, rs)...)
 	findings = append(findings, checkMetaphorRepeat(doc, rs)...)
+	findings = append(findings, checkBoldNotRendered(doc, rs)...)
 
 	sort.SliceStable(findings, func(i, j int) bool {
 		if findings[i].Line != findings[j].Line {
@@ -298,6 +299,33 @@ func isPoliteMasu(trimmed string, r []rune) bool {
 		}
 	}
 	return true
+}
+
+// checkBoldNotRendered は GitHub などで太字として表示されない ** を拾う｡
+// 引用行も対象にする｡他人の文でも、表示が崩れるのは読み手にそのまま見えるため｡
+func checkBoldNotRendered(doc *Document, rs *rules.RuleSet) []Finding {
+	cfg := rs.Aggregates.BoldNotRendered
+	const ruleID = "bold-not-rendered"
+	if !cfg.Enabled || doc.IsDisabled(ruleID) {
+		return nil
+	}
+
+	// 複数行にまたがる太字は改行を含むため、1 行で読める記号へ置き換える｡
+	oneLine := strings.NewReplacer("\n", "⏎")
+	var findings []Finding
+	for _, p := range boldProblems(doc.Source) {
+		guidance := p.How + "｡"
+		if p.Suggest != "" {
+			guidance += "案: " + oneLine.Replace(p.Suggest)
+		}
+		findings = append(findings, Finding{
+			File: doc.Path, Line: p.Line, RuleID: ruleID, Severity: cfg.Severity,
+			Message:  "太字の印 (**) が記号に接していて、GitHub などでは太字にならず ** がそのまま表示される｡",
+			Guidance: guidance,
+			Excerpt:  oneLine.Replace(p.Found),
+		})
+	}
+	return findings
 }
 
 // checkMetaphorRepeat は比喩の目印が文書内で何度も出ていないかを見る｡
