@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026.1010.0](https://github.com/usadamasa/japanese-writer/compare/2026.1004.0...2026.1010.0) - 2026-10-10
+
+- prh: 「正本」禁止ルールの助詞カバレッジを広げる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/42
+- 文書の立場 (勧め・決まり・説明) で文末を揃える規範を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/44
+
 ## [2026.1004.0](https://github.com/usadamasa/japanese-writer/compare/2026.0930.0...2026.1004.0) - 2026-10-04
 
 - proofread の textlint を毎回実行し、Tier 1 を報告から外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/27
