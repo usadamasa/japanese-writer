@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1010.1](https://github.com/usadamasa/japanese-writer/compare/2026.1010.0...2026.1010.1) - 2026-10-10
+
+- chore(aqua): golangci-lint を v2.14.0 に上げる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/46
+- proofread: Tier 2 の適用条件に意味の保持と情報の不増補を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/45
+- docs: md の句読点を全角に揃える by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/48
+
 ## [2026.1010.0](https://github.com/usadamasa/japanese-writer/compare/2026.1004.0...2026.1010.0) - 2026-10-10
 
 - prh: 「正本」禁止ルールの助詞カバレッジを広げる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/42
