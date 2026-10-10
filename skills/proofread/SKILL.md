@@ -159,3 +159,13 @@ Tier 2 は問い合わせずに全件適用し､ 適用した前後と Tier 3 �
 ## 失敗時挙動
 
 詳細は `references/failure-modes.md`｡
+
+## 出典
+
+- **nanaism の yomiyasu「最優先ルール: 意味の保持」「情報の不増補（足さない）」** (Tier 2 の意味の保持):
+  <https://github.com/nanaism/yomiyasu> (MIT)
+  - 書き換えの前後で主張・比重・言い切りの強さ・文の働きを保つこと、否定が比重を担う否定対比は否定を残すことを翻案した。
+    元の文と前後から分からない情報を推測で足さないことも翻案し、どちらも `references/tier-classification.md` の
+    Tier 2 の条件にした。
+    言い切りの強さは japanese-tech-writing の Phase 2.3 を参照する形にした。原典の出力欄の書式と「書き手に確かめたい点」の
+    件数の上限は採らず、足りない情報は Tier 3 の警告として返す。

@@ -134,6 +134,7 @@ medium に応じて `Skill` で `japanese-writer:japanese-tech-writing` を読�
 - **Phase 2 違反**:
   - 整形 (Phase 2.1): ダッシュ・区切り線詰め込み → Tier 2
   - 段落と論証 (Phase 2.2): パラグラフ分割、 段落の論証順序、 前方参照の位置 → Tier 2
+  - 段落と論証 (Phase 2.2): 否定対比・譲歩に根拠が無い → Tier 3 (根拠の文は書き手が書く。本 subagent は作らない)
   - 論証の厳密さ (Phase 2.3): 因果の機構未説明、 譲歩の宙吊り → Tier 3
   - 視点と語り (Phase 2.4): 「あなた」使用 → Tier 2 (役割名に置換)、 受動態多用 → Tier 3
   - 一文の長さ (Phase 2.5): 100 字超 / 読点 3 個以上 → Tier 2 (textlint preset でも検出)
@@ -156,6 +157,12 @@ medium に応じて `Skill` で `japanese-writer:japanese-tech-writing` を読�
   本 subagent は会話履歴を持たないため、 「会話を見ていない読者」 の視点そのものになる｡ 一方で何が会話由来かは判別できないので、 **読者に不要なメタ記述として検出する**｡ 判断が割れるものは Tier 2 に落とさず Tier 3 で警告する｡
 
 `${CLAUDE_PLUGIN_ROOT}/skills/proofread/references/tier-classification.md` に従って Tier 1/2/3 候補を抽出｡ 各候補に対し `{id, category, line, current, suggestion or excerpt}` を組み立てる｡
+
+`suggestion` は次の条件をすべて満たす形で書く。満たす書き換えが書けなければ、その候補は Tier 3 にして `excerpt` を付ける。
+
+- 主張・比重・言い切りの強さ・文の働きを `current` から動かさない (`tier-classification.md` の「意味の保持」節)
+- `current` と前後の文から分からない情報を足さない。動作主・原因・条件・数値・例・否定や譲歩の根拠を推測で補わず、
+  足りないものは Tier 3 の警告に書く
 
 **文書の種類別の優先度調整**: medium と Phase 1.2 マトリクスに従って Tier を調整 (fofr 優先の文書では厳しく、 文体優先の文書ではゆるめる)｡ 詳細は `tier-classification.md` の「文書の種類別の優先度調整」節を参照｡
 
