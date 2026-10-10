@@ -125,6 +125,11 @@ medium に応じて `Skill` で `japanese-writer:japanese-tech-writing` を読�
 - **Phase 1 違反**:
   - 重点先行ができてない (節が背景から始まる、 結論が h3 以下に埋もれてる) → Tier 2 (構造変更提案) or Tier 3 (修正方向複数)
   - scope 節欠落 (medium=wiki で内容が ADR/Design Doc 型なのに「Decision/Out of scope」「Goals/Non-Goals」「対象/対象外」がない、 docs で ADR/Design Doc 型なのに同様) → Tier 3 (文書の種類ごとの必須/任意は Phase 1.3 表参照)
+  - 立場と文末の不一致 (Phase 1.1 の文書の立場): 本文の多数派の文末が示す立場 (勧め・決まり・説明) と、
+    別の立場の文末が混ざる → Tier 3。本 subagent は依頼の行き先を知らないので、立場は本文の手がかりと
+    medium (Phase 1.2 の立場の既定) から推定するだけにし、警告には多数派の立場と外れた文を書いて直す向きは示さない。
+    揃っている文末、同じ立場の中の強さの差、手順末尾の 1 文だけの「〜しましょう」、
+    である体の「〜する」(決まりと説明を兼ねる) は検出しない
 - **Phase 2 違反**:
   - 整形 (Phase 2.1): ダッシュ・区切り線詰め込み → Tier 2
   - 段落と論証 (Phase 2.2): パラグラフ分割、 段落の論証順序、 前方参照の位置 → Tier 2
