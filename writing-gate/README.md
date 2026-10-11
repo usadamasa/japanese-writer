@@ -43,7 +43,7 @@ textlint が拾えないものだけを見る。語彙・表記の点検は `pro
 |----|----|----|
 | `process-leak` | 制作過程の痕跡 | error |
 | `pink-elephant` | 却下・削除した案の痕跡 | error |
-| `inline-enumeration` | 括弧内の「A / B / C」や「A + B + C」で構成要素を並べた説明文 | warn |
+| `inline-enumeration` | 括弧内の「A / B / C」や読点で 4 つ以上並べた列挙、「A + B + C」で構成要素を並べた説明文 | warn |
 
 判定の範囲と設定のキーは [`docs/rules/phrase-rules.md`](docs/rules/phrase-rules.md) にある。
 
