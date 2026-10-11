@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1011.0](https://github.com/usadamasa/japanese-writer/compare/2026.1010.1...2026.1011.0) - 2026-10-11
+
+- writing-gate: inline-enumeration で括弧内の読点区切りの列挙を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/49
+
 ## [2026.1010.1](https://github.com/usadamasa/japanese-writer/compare/2026.1010.0...2026.1010.1) - 2026-10-10
 
 - chore(aqua): golangci-lint を v2.14.0 に上げる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/46
