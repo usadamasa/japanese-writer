@@ -77,6 +77,9 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"句点の後に主題句だけ残す行を拾う", "wrap-orphan-topic", "案を並べてレビューを通してから送る｡agy は", true},
 		{"句点で切った行は拾わない", "wrap-orphan-topic", "案を並べてレビューを通してから送る｡", false},
 		{"inline code の除去跡は拾わない", "wrap-orphan-topic", "有効化はユーザーが手で行う｡ が", false},
+		{"括弧内に読点で 4 つ以上並べた列挙を拾う", "inline-enumeration", "install 後の前提確認 (herdr か rex､go/jq､statusline の state file､バイナリ､peer messaging)｡", true},
+		{"全角読点の列挙も拾う", "inline-enumeration", "前提を確かめる (git、jq、go、task)。", true},
+		{"括弧内の 3 項目は拾わない", "inline-enumeration", "対象は 3 種類 (wiki、ADR、blog) ある｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
