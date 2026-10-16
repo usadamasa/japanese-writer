@@ -106,7 +106,7 @@ proofread は汎用の機械点検と文章規範だけを持つ。書き手ご�
 
 plugin を使うだけなら「前提」節のツールで足りる。このリポジトリで開発するときは、加えて次を用意する。
 
-- [aqua](https://aquaproj.github.io/)。task・golangci-lint・shellcheck・pinact・jv の版を `aqua.yaml` で固定している。
+- [aqua](https://aquaproj.github.io/)。task・golangci-lint・shellcheck・jv の版を `aqua.yaml` で固定している。
   `.envrc` が shim を張って `$(aqua root-dir)/bin` を PATH に足すので、direnv を入れて `direnv allow` する。
   direnv を使わないなら `aqua i -l` を打ち、同じパスを自分で PATH に通す
 - [jv](https://github.com/santhosh-tekuri/jsonschema) (`task validate` が JSON / YAML を宣言された schema で検証するのに使う)。
