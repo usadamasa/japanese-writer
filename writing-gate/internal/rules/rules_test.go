@@ -73,6 +73,8 @@ func TestPhraseRuleMatches(t *testing.T) {
 	}{
 		{"部分一致で拾う", "process-leak", "ご指示のとおり、設定を分割した｡", true},
 		{"正規表現で拾う", "pink-elephant", "以前は symlink だったが、今は不要になった｡", true},
+		{"レビューでの前提変更を拾う", "process-leak", "レビューでこの前提を外し、本文を書き直した｡", true},
+		{"初版の前提を拾う", "pink-elephant", "初版はこの前提で書いていた｡", true},
 		{"当たらない文は空", "process-leak", "設定の原本は config/settings/ に置く｡", false},
 		{"句点の後に主題句だけ残す行を拾う", "wrap-orphan-topic", "案を並べてレビューを通してから送る｡agy は", true},
 		{"句点で切った行は拾わない", "wrap-orphan-topic", "案を並べてレビューを通してから送る｡", false},
