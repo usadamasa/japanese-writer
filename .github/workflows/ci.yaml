@@ -1,4 +1,3 @@
-# This workflow is managed by gh actions-lock.
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: ci
 
@@ -139,7 +138,7 @@ jobs:
       - name: Install gh-actions-lock
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh extension install github/gh-actions-lock --pin v0.1.6
+        run: gh extension install github/gh-actions-lock --pin v0.2.0
 
       - name: Verify actions are locked
         env:
@@ -147,6 +146,9 @@ jobs:
         run: gh actions-lock --verify
 
   ci-status-check:
+    runs-on: ubuntu-slim
+    if: always()
+    timeout-minutes: 10
     needs:
       - go-test
       - lint
@@ -155,8 +157,6 @@ jobs:
       - bats-test
       - shellcheck
       - actions-lock
-    if: failure()
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - run: exit 1
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
