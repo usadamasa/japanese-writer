@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -28,6 +29,18 @@ func toolUseLine(tool, filePath string) string {
 		`{"type":"tool_use","name":"` + tool + `","input":{"file_path":"` + filePath + `"}}]}}`
 }
 
+// toolUseInputLine は任意の入力を持つ tool_use 1 件の transcript 行を作る｡
+// new_string や content は改行や引用符を含むため、JSON へは Marshal で埋める｡
+func toolUseInputLine(t *testing.T, tool string, input map[string]any) string {
+	t.Helper()
+	raw, err := json.Marshal(input)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	return `{"type":"assistant","message":{"role":"assistant","content":[` +
+		`{"type":"tool_use","name":"` + tool + `","input":` + string(raw) + `}]}}`
+}
+
 func TestEditedMarkdown(t *testing.T) {
 	dir := t.TempDir()
 	transcript := writeTestFile(t, dir, "session.jsonl", strings.Join([]string{
@@ -45,10 +58,101 @@ func TestEditedMarkdown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("EditedMarkdown: %v", err)
 	}
-	want := []string{"/repo/a.md", "/repo/b.md", "/repo/c.md"}
-	if !slices.Equal(got, want) {
-		t.Errorf("EditedMarkdown = %v, want %v", got, want)
+	paths := make([]string, 0, len(got))
+	for _, e := range got {
+		paths = append(paths, e.Path)
 	}
+	want := []string{"/repo/a.md", "/repo/b.md", "/repo/c.md"}
+	if !slices.Equal(paths, want) {
+		t.Errorf("EditedMarkdown のパス = %v, want %v", paths, want)
+	}
+}
+
+func TestEditedMarkdownFragments(t *testing.T) {
+	dir := t.TempDir()
+	transcript := writeTestFile(t, dir, "session.jsonl", strings.Join([]string{
+		toolUseInputLine(t, "Edit", map[string]any{
+			"file_path": "/repo/a.md", "old_string": "x", "new_string": "一行目｡",
+		}),
+		toolUseInputLine(t, "MultiEdit", map[string]any{
+			"file_path": "/repo/a.md",
+			"edits": []map[string]any{
+				{"old_string": "y", "new_string": "二行目｡"},
+				{"old_string": "z", "new_string": "三行目｡"},
+			},
+		}),
+		toolUseInputLine(t, "Edit", map[string]any{
+			"file_path": "/repo/b.md", "old_string": "x", "new_string": "追記｡",
+		}),
+		toolUseInputLine(t, "Write", map[string]any{
+			"file_path": "/repo/b.md", "content": "全体｡\n",
+		}),
+		toolUseInputLine(t, "NotebookEdit", map[string]any{
+			"file_path": "/repo/c.md", "new_source": "セル｡",
+		}),
+		toolUseInputLine(t, "Write", map[string]any{
+			"file_path": "/repo/d.md", "content": "全体｡\n",
+		}),
+		toolUseInputLine(t, "Edit", map[string]any{
+			"file_path": "/repo/d.md", "old_string": "全体", "new_string": "差し替え",
+		}),
+	}, "\n")+"\n")
+
+	got, err := EditedMarkdown(transcript)
+	if err != nil {
+		t.Fatalf("EditedMarkdown: %v", err)
+	}
+	if len(got) != 4 {
+		t.Fatalf("len = %d, want 4: %+v", len(got), got)
+	}
+	// Write の後の Edit で Whole が外れてはいけない｡
+	if !got[3].Whole {
+		t.Errorf("d.md = %+v, want Whole", got[3])
+	}
+	if got[0].Whole || !slices.Equal(got[0].Fragments, []string{"一行目｡", "二行目｡", "三行目｡"}) {
+		t.Errorf("a.md = %+v, want Edit と MultiEdit の new_string", got[0])
+	}
+	// Write はファイル全体を書いたことになる｡
+	if !got[1].Whole {
+		t.Errorf("b.md = %+v, want Whole", got[1])
+	}
+	// 書いた本文を取り出せないツールは、ファイル全体を書いたものとして扱う｡
+	if !got[2].Whole {
+		t.Errorf("c.md = %+v, want Whole", got[2])
+	}
+}
+
+func TestFocusLines(t *testing.T) {
+	src := "# 見出し\n\n既存の行｡\n追記した行｡\n続けた行｡\n\n既存の行｡\n"
+
+	t.Run("書いた断片が現れる行を返す", func(t *testing.T) {
+		got := FocusLines(src, EditedFile{Fragments: []string{"追記した行｡\n続けた行｡"}})
+		want := map[int]bool{4: true, 5: true}
+		if !maps.Equal(got, want) {
+			t.Errorf("FocusLines = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("同じ断片が複数回現れればすべて返す", func(t *testing.T) {
+		got := FocusLines(src, EditedFile{Fragments: []string{"既存の行｡"}})
+		want := map[int]bool{3: true, 7: true}
+		if !maps.Equal(got, want) {
+			t.Errorf("FocusLines = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("後の編集で消えた断片は数えない", func(t *testing.T) {
+		got := FocusLines(src, EditedFile{Fragments: []string{"消した行｡", ""}})
+		if len(got) != 0 {
+			t.Errorf("FocusLines = %v, want 空", got)
+		}
+	})
+
+	t.Run("Whole なら nil を返して文書全体を見る", func(t *testing.T) {
+		if got := FocusLines(src, EditedFile{Whole: true}); got != nil {
+			t.Errorf("FocusLines = %v, want nil", got)
+		}
+	})
 }
 
 func TestEditedMarkdownMissingFile(t *testing.T) {
@@ -231,6 +335,60 @@ func TestRunGate(t *testing.T) {
 		transcript := writeTestFile(t, dir, "warn.jsonl", toolUseLine("Write", warn)+"\n")
 		if out := run(t, transcript); out.Decision != "" {
 			t.Errorf("Decision = %q, want 空", out.Decision)
+		}
+	})
+
+	// issue #53: 既存の md に 1 行足しただけで、触っていない行の指摘で block されていた｡
+	t.Run("Edit で書いていない既存行の指摘では block しない", func(t *testing.T) {
+		existing := writeTestFile(t, dir, "existing.md",
+			"# 配置\n\nご指示のとおり、設定を分割した｡\n\n拡張子は .md と .bpmn を置く｡\n")
+		transcript := writeTestFile(t, dir, "existing.jsonl", toolUseInputLine(t, "Edit", map[string]any{
+			"file_path":  existing,
+			"old_string": "拡張子は .md を置く｡",
+			"new_string": "拡張子は .md と .bpmn を置く｡",
+		})+"\n")
+		if out := run(t, transcript); out.Decision != "" {
+			t.Errorf("Decision = %q, want 空: %s", out.Decision, out.Reason)
+		}
+	})
+
+	t.Run("Edit で書いた行の指摘は block する", func(t *testing.T) {
+		edited := writeTestFile(t, dir, "edited.md",
+			"# 配置\n\n設定の原本は config/ に置く｡\n\nご指示のとおり、設定を分割した｡\n")
+		transcript := writeTestFile(t, dir, "edited.jsonl", toolUseInputLine(t, "Edit", map[string]any{
+			"file_path":  edited,
+			"old_string": "設定を分割した｡",
+			"new_string": "ご指示のとおり、設定を分割した｡",
+		})+"\n")
+		out := run(t, transcript)
+		if out.Decision != "block" {
+			t.Fatalf("Decision = %q, want block", out.Decision)
+		}
+		if !strings.Contains(out.Reason, "edited.md\n  error:5 [process-leak]") {
+			t.Errorf("書いた行 (5 行目) の指摘が無い: %s", out.Reason)
+		}
+	})
+
+	t.Run("MultiEdit で書いていない既存行の指摘では block しない", func(t *testing.T) {
+		multi := writeTestFile(t, dir, "multi.md",
+			"ご指示のとおり、設定を分割した｡\n\n原本は config/ に置く｡\n")
+		transcript := writeTestFile(t, dir, "multi.jsonl", toolUseInputLine(t, "MultiEdit", map[string]any{
+			"file_path": multi,
+			"edits": []map[string]any{
+				{"old_string": "原本は", "new_string": "原本は config/ に置く｡"},
+			},
+		})+"\n")
+		if out := run(t, transcript); out.Decision != "" {
+			t.Errorf("Decision = %q, want 空: %s", out.Decision, out.Reason)
+		}
+	})
+
+	t.Run("block の reason に無効化コメントの書式がある", func(t *testing.T) {
+		bad := writeTestFile(t, dir, "bad2.md", "ご指示のとおり、設定を分割した｡\n")
+		transcript := writeTestFile(t, dir, "bad2.jsonl", toolUseLine("Write", bad)+"\n")
+		out := run(t, transcript)
+		if !strings.Contains(out.Reason, "<!-- writing-gate-disable process-leak -->") {
+			t.Errorf("reason に無効化コメントの書式が無い: %s", out.Reason)
 		}
 	})
 

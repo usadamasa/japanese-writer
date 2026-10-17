@@ -59,7 +59,7 @@ func checkPhrases(doc *Document, rs *rules.RuleSet) []Finding {
 			continue
 		}
 		for _, ln := range doc.Lines {
-			if ln.Kind == KindQuote {
+			if ln.Kind == KindQuote || !doc.InFocus(ln.Num, ln.Num) {
 				continue
 			}
 			if len(rule.Kinds) > 0 && !slices.Contains(rule.Kinds, kindName(ln.Kind)) {
@@ -106,11 +106,12 @@ func checkSentenceEndingRepeat(doc *Document, rs *rules.RuleSet) []Finding {
 
 	var findings []Finding
 	var runSuffix string
-	var runStart int
+	var runStart, runEnd int
 	runLen := 0
 
+	// 連続の一部でも書いていれば指摘する｡行番号は連続の先頭を指す｡
 	flush := func() {
-		if runLen >= cfg.MinRun {
+		if runLen >= cfg.MinRun && doc.InFocus(runStart, runEnd) {
 			findings = append(findings, Finding{
 				File: doc.Path, Line: runStart, RuleID: ruleID, Severity: cfg.Severity,
 				Message:  fmt.Sprintf("同じ語尾 (「%s」) の文が %d 文続いている｡", runSuffix, runLen),
@@ -141,11 +142,13 @@ func checkSentenceEndingRepeat(doc *Document, rs *rules.RuleSet) []Finding {
 		}
 		if suffix == runSuffix {
 			runLen++
+			runEnd = s.Line
 			continue
 		}
 		flush()
 		runSuffix = suffix
 		runStart = s.Line
+		runEnd = s.Line
 		runLen = 1
 	}
 	flush()
@@ -236,13 +239,22 @@ func checkStyleMix(doc *Document, rs *rules.RuleSet) []Finding {
 		minority, majorityName = plain, "ですます体"
 	}
 
+	// 多数派・少数派は文書全体で数え、例に挙げる文だけを Focus で絞る｡
+	// 例の上限を先に当てると、上限より後ろで書いた文が漏れる｡
+	var focused []Sentence
+	for _, s := range minority {
+		if doc.InFocus(s.Line, s.Line) {
+			focused = append(focused, s)
+		}
+	}
+
 	limit := cfg.MaxExamples
-	if limit <= 0 || limit > len(minority) {
-		limit = len(minority)
+	if limit <= 0 || limit > len(focused) {
+		limit = len(focused)
 	}
 
 	findings := make([]Finding, 0, limit)
-	for _, s := range minority[:limit] {
+	for _, s := range focused[:limit] {
 		findings = append(findings, Finding{
 			File: doc.Path, Line: s.Line, RuleID: ruleID, Severity: cfg.Severity,
 			Message: fmt.Sprintf("文体が混ざっている｡文書全体は %s が多数 (である体 %d 文 / ですます体 %d 文)｡",
@@ -314,6 +326,9 @@ func checkBoldNotRendered(doc *Document, rs *rules.RuleSet) []Finding {
 	oneLine := strings.NewReplacer("\n", "⏎")
 	var findings []Finding
 	for _, p := range boldProblems(doc.Source) {
+		if !doc.InFocus(p.Line, p.Line) {
+			continue
+		}
 		guidance := p.How + "｡"
 		if p.Suggest != "" {
 			guidance += "案: " + oneLine.Replace(p.Suggest)
@@ -336,6 +351,7 @@ func checkMetaphorRepeat(doc *Document, rs *rules.RuleSet) []Finding {
 		return nil
 	}
 
+	// 数は文書全体で数え、行番号は Focus の中で最初に目印が出た行を指す｡
 	count := 0
 	first := 0
 	for _, ln := range doc.Lines {
@@ -348,13 +364,13 @@ func checkMetaphorRepeat(doc *Document, rs *rules.RuleSet) []Finding {
 				continue
 			}
 			n := strings.Count(text, marker)
-			if n > 0 && first == 0 {
+			if n > 0 && first == 0 && doc.InFocus(ln.Num, ln.Num) {
 				first = ln.Num
 			}
 			count += n
 		}
 	}
-	if count < cfg.MinCount {
+	if count < cfg.MinCount || first == 0 {
 		return nil
 	}
 	return []Finding{{

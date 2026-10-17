@@ -49,6 +49,10 @@ type Document struct {
 	// ルール ID の集合｡ID を伴わない場合は全ルールを無効化するため All が true になる｡
 	DisabledRules map[string]bool
 	DisabledAll   bool
+	// Focus は指摘を出す行番号の集合｡nil なら文書全体を見る｡
+	// 空の集合は「見る行が無い」で、nil とは区別する｡
+	// 集計ルールの判定は文書全体で行い、指摘を出すかどうかだけを Focus で決める｡
+	Focus map[int]bool
 }
 
 var (
@@ -113,6 +117,19 @@ func (d *Document) readDisableMarkers(src string) {
 // IsDisabled は指定ルールが無効化されているかを返す｡
 func (d *Document) IsDisabled(ruleID string) bool {
 	return d.DisabledAll || d.DisabledRules[ruleID]
+}
+
+// InFocus は from 行から to 行までのどれかが Focus に入っているかを返す｡
+func (d *Document) InFocus(from, to int) bool {
+	if d.Focus == nil {
+		return true
+	}
+	for n := from; n <= to; n++ {
+		if d.Focus[n] {
+			return true
+		}
+	}
+	return false
 }
 
 func skipFrontMatter(raw []string) int {

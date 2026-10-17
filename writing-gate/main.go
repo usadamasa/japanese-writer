@@ -93,7 +93,11 @@ func runScan(args []string) error {
 		return err
 	}
 
-	findings, err := scanFiles(targets, rs)
+	whole := make([]EditedFile, 0, len(targets))
+	for _, path := range targets {
+		whole = append(whole, EditedFile{Path: path, Whole: true})
+	}
+	findings, err := scanFiles(whole, rs)
 	if err != nil {
 		return err
 	}
@@ -126,14 +130,16 @@ func runScan(args []string) error {
 
 // scanFiles は対象ファイルを順に点検する｡読めないファイルはエラーにする｡
 // 「点検できなかった」を「指摘なし」と取り違えると、ゲートが素通りするため｡
-func scanFiles(targets []string, rs *rules.RuleSet) ([]prose.Finding, error) {
+// 指摘は書いた行 (FocusLines) に絞る｡
+func scanFiles(targets []EditedFile, rs *rules.RuleSet) ([]prose.Finding, error) {
 	var findings []prose.Finding
-	for _, path := range targets {
-		src, err := os.ReadFile(path) // #nosec G304 -- CLI ツール: パスは利用者指定
+	for _, t := range targets {
+		src, err := os.ReadFile(t.Path) // #nosec G304 -- CLI ツール: パスは利用者指定
 		if err != nil {
-			return nil, fmt.Errorf("%s の読み込みに失敗しました: %w", path, err)
+			return nil, fmt.Errorf("%s の読み込みに失敗しました: %w", t.Path, err)
 		}
-		doc := prose.ParseDocument(path, string(src))
+		doc := prose.ParseDocument(t.Path, string(src))
+		doc.Focus = FocusLines(string(src), t)
 		findings = append(findings, prose.Check(doc, rs)...)
 	}
 	return findings, nil
