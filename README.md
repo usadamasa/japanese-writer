@@ -109,8 +109,8 @@ plugin を使うだけなら「前提」節のツールで足りる。このリ�
 - flakes を有効にした [Nix](https://nixos.org/)。Go・task・golangci-lint・shellcheck・bats・jq・
   [jv](https://github.com/santhosh-tekuri/jsonschema) は `flake.nix` の devShell で揃え、版は `flake.lock` が固定する
   nixpkgs で決まる。nixpkgs に無い jv は `flake.nix` の中でソースからビルドする。CI も同じ flake を使う
-- [direnv](https://direnv.net/) と [nix-direnv](https://github.com/nix-community/nix-direnv) (任意)。`.envrc` が
-  `use flake` で devShell を読み込むので `direnv allow` する。direnv を使わないなら `nix develop` で devShell に入る
+- [direnv](https://direnv.net/) と [nix-direnv](https://github.com/nix-community/nix-direnv)。`.envrc` が
+  `use flake` で devShell を読み込むので `direnv allow` する
 - Claude Code CLI (`task validate` が `claude plugin validate` を呼ぶ)
 
 `go.mod` の `go` ディレクティブは devShell の `go_1_26` と揃え、`GOTOOLCHAIN=local` でずれたら失敗させる。
