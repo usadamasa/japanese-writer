@@ -149,7 +149,7 @@ md の先頭に HTML コメントを置く。`writing-gate-disable` に続けて
 ```
 
 会話の記録そのものが成果物である面 (議事録・日誌・対話ログ) と、生成物・作業用
-ファイルを外してある。`sanitize-artifacts` の「適用しない面」に揃えた。
+ファイルを外してある。`sanitize-artifacts` を適用しない面に揃えた。
 
 `~/.claude/writing-gate.json` で変えられる。リポジトリには入れない。
 
