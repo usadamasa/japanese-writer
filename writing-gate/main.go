@@ -55,6 +55,8 @@ func usage() {
   writing-gate gate --transcript PATH [--config PATH] [--rules PATH]
       transcript から今セッションで編集された .md を拾って点検し、
       severity=error が残っていれば Stop hook 用の block JSON を stdout へ出す｡
+      前回の block に載せた指摘は出さない｡ユーザーが /japanese-writer:gate-off を
+      打っていれば点検しない｡
 `)
 }
 
@@ -121,7 +123,7 @@ func runScan(args []string) error {
 			fmt.Println("writing-gate: 指摘なし")
 			return nil
 		}
-		fmt.Print(formatFindings(findings))
+		fmt.Print(formatFindings(findings, false))
 	default:
 		return fmt.Errorf("不明な --format: %s", *format)
 	}
@@ -156,7 +158,8 @@ func countSeverity(findings []prose.Finding, severity string) int {
 }
 
 // formatFindings は人間と agent の両方が読める整形をする｡
-func formatFindings(findings []prose.Finding) string {
+// withID は gate が使う｡指摘 ID を載せておき、次の Stop で transcript から読み戻す｡
+func formatFindings(findings []prose.Finding, withID bool) string {
 	var b strings.Builder
 	var lastFile string
 	for _, f := range findings {
@@ -164,7 +167,11 @@ func formatFindings(findings []prose.Finding) string {
 			fmt.Fprintf(&b, "\n%s\n", f.File)
 			lastFile = f.File
 		}
-		fmt.Fprintf(&b, "  %s:%d [%s] %s\n", f.Severity, f.Line, f.RuleID, f.Message)
+		fmt.Fprintf(&b, "  %s:%d [%s] %s", f.Severity, f.Line, f.RuleID, f.Message)
+		if withID {
+			fmt.Fprintf(&b, " (wg:%s)", FindingID(f))
+		}
+		b.WriteString("\n")
 		if f.Excerpt != "" {
 			fmt.Fprintf(&b, "      該当: %s\n", truncate(f.Excerpt, 60))
 		}

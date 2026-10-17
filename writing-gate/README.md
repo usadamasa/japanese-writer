@@ -74,6 +74,8 @@ writing-gate gate --transcript PATH [--config PATH] [--rules PATH] [--max-files 
 - `Write` はファイル全体を書いたものとして扱う
 - `Edit` / `MultiEdit` は `new_string` が今の本文に現れる行を書いた行とする。
   後の編集で消えた断片は数えない。同じ断片が複数箇所にあれば全部を数える
+- `new_string` のうち `old_string` にそのまま含まれる行は書いた行に数えない。一意にするために添えた
+  前後の行で、その行に元からある指摘を今回の不備として出さないため。空行も数えない
 - 書いた本文を取り出せないツール (`NotebookEdit` など) はファイル全体を書いたものとして扱う
 
 集計ルールは数える範囲と指摘を出す範囲が違う。数えるのは文書全体で、指摘は書いた行に
@@ -84,7 +86,35 @@ writing-gate gate --transcript PATH [--config PATH] [--rules PATH] [--max-files 
 - `style-mix` は多数派を文書全体で決め、書いた行の少数派の文だけを例に挙げる
 - `metaphor-repeat` は文書全体で数え、書いた行に目印があれば出す
 
-block の reason には、原因になったルール ID を入れた無効化コメントの書式を載せる。
+block の reason には、原因になったルール ID を入れた無効化コメントの書式と、セッションの間だけ
+止める `/japanese-writer:gate-off` の案内を載せる。
+
+### 同じ指摘は 1 回だけ出す
+
+`gate` は同じ指摘でセッションを 2 度止めない。指摘を受けてもその文書では直さないと決めたとき、
+ユーザーがメッセージを送るたびに同じ指摘で止まるのを避けるため。
+
+block の reason の各指摘には ID (`(wg:3f2a9c1e)` の形) を付ける。ID はファイル・ルール ID・該当文から
+作るので、上の行を編集して行番号がずれても同じ指摘は同じ ID になる。block は transcript に
+残るので、次の `gate` は transcript にある ID の指摘を判定から外す。外した指摘は reason にも載らない。
+
+`sentence-ending-repeat` の該当文は語尾だけなので、同じ語尾の連続は同じファイルの中で 1 度しか出ない。
+
+### セッションの間だけ止める
+
+ユーザーが `/japanese-writer:gate-off` を打つと、そのセッションの `gate` は点検せずに通す。
+`/japanese-writer:gate-on` で戻る。後に打った方が効く。
+
+状態はファイルにも設定にも持たず、その Stop が渡してきた transcript だけから読む。だから効くのは
+同じセッション (同じ transcript) の間だけで、セッションが変われば初期状態 (点検する) に戻る。
+
+無効化コメントと `exclude_extra` はファイル単位で恒久的に効くので、他人のファイルや共有のルールファイル
+には入れにくい。gate-off はファイルにも設定にも触れない。
+
+ユーザーが打った slash command は transcript の user エントリに `<command-name>` として残り、`gate` は
+それだけを読む。Claude が Skill ツールで同じ skill を呼んでも `tool_use` にしか残らないので効かない。
+止める判断をユーザーだけが持つようにするため。skill 側も `disable-model-invocation: true` で
+Claude からは呼べなくしてある。
 
 ## ルールの置き場
 
@@ -146,6 +176,9 @@ prh に載せられないため、ここが分担の線になる。
 
 ## 除外と無効化
 
+セッションの間だけ止めるなら、ファイルにも設定にも触れない `/japanese-writer:gate-off`
+(「セッションの間だけ止める」節) を使う。
+
 ### ファイル単位の無効化
 
 md の先頭に HTML コメントを置く。`writing-gate-disable` に続けてルール ID を
@@ -192,9 +225,11 @@ SessionStart hook (hooks/session-start-prepare.sh)
 
 Stop hook (hooks/stop-writing-gate.sh)
   └─ ${CLAUDE_PLUGIN_DATA}/bin/writing-gate gate --transcript <path>
-       ├─ transcript から Write/Edit/MultiEdit/NotebookEdit の .md を拾う
+       ├─ transcript から Write/Edit/MultiEdit/NotebookEdit の .md、前回の block の指摘 ID、
+       │  ユーザーが打った gate-off / gate-on を拾う
+       ├─ gate-off が効いていれば点検せずに通す
        ├─ 除外と上限 (既定 20 件) を当てる
-       ├─ 点検して、書いた行にかかる指摘だけを残す
+       ├─ 点検して、書いた行にかかる指摘だけを残し、前回に載せた指摘を外す
        └─ error があれば {"decision":"block","reason":...} を出す
 ```
 
