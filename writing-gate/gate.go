@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -94,9 +95,13 @@ func (c *GateConfig) IsExcluded(path string) bool {
 	return false
 }
 
-// editInput は Write / Edit 系 tool_use の入力から file_path だけを取る｡
+// editInput は Write / Edit 系 tool_use の入力から、書いたファイルと本文を取る｡
 type editInput struct {
-	FilePath string `json:"file_path"`
+	FilePath  string  `json:"file_path"`
+	NewString *string `json:"new_string"`
+	Edits     []struct {
+		NewString string `json:"new_string"`
+	} `json:"edits"`
 }
 
 // editTools は「文書を書いた」とみなすツール｡
@@ -107,17 +112,41 @@ var editTools = map[string]bool{
 	"NotebookEdit": true,
 }
 
-// EditedMarkdown は transcript から編集された .md の絶対パスを重複なく拾う｡
+// EditedFile はセッション中に書いた .md 1 件｡
+type EditedFile struct {
+	Path string
+	// Fragments は Edit / MultiEdit の new_string｡
+	Fragments []string
+	// Whole はファイル全体を書いたことを表す｡Write のほか、書いた本文を
+	// 取り出せないツールもこちらに倒す｡点検の漏れより、点検しすぎを選ぶ｡
+	Whole bool
+}
+
+// add は tool_use 1 件分の書き込みを積む｡
+func (e *EditedFile) add(tool string, in editInput) {
+	switch {
+	case tool == "Edit" && in.NewString != nil:
+		e.Fragments = append(e.Fragments, *in.NewString)
+	case tool == "MultiEdit" && len(in.Edits) > 0:
+		for _, ed := range in.Edits {
+			e.Fragments = append(e.Fragments, ed.NewString)
+		}
+	default:
+		e.Whole = true
+	}
+}
+
+// EditedMarkdown は transcript から編集された .md を重複なく拾う｡
 // 出現順を保つので、報告の並びがセッションの作業順になる｡
-func EditedMarkdown(transcriptPath string) ([]string, error) {
+func EditedMarkdown(transcriptPath string) ([]EditedFile, error) {
 	f, err := os.Open(transcriptPath) // #nosec G304 -- CLI ツール: パスは hook 由来
 	if err != nil {
 		return nil, fmt.Errorf("transcript を開けません: %w", err)
 	}
 	defer func() { _ = f.Close() }()
 
-	seen := map[string]bool{}
-	var out []string
+	index := map[string]int{}
+	var out []EditedFile
 	scanner := jsonlscan.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Bytes()
@@ -136,17 +165,52 @@ func EditedMarkdown(transcriptPath string) ([]string, error) {
 			if err := json.Unmarshal(block.Input, &in); err != nil {
 				continue
 			}
-			if !strings.HasSuffix(in.FilePath, ".md") || seen[in.FilePath] {
+			if !strings.HasSuffix(in.FilePath, ".md") {
 				continue
 			}
-			seen[in.FilePath] = true
-			out = append(out, in.FilePath)
+			i, ok := index[in.FilePath]
+			if !ok {
+				i = len(out)
+				index[in.FilePath] = i
+				out = append(out, EditedFile{Path: in.FilePath})
+			}
+			out[i].add(block.Name, in)
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("transcript の読み取りに失敗しました: %w", err)
 	}
 	return out, nil
+}
+
+// FocusLines は書いた断片が現在の本文に現れる行番号を返す｡Whole なら nil を返す｡
+//
+// 断片は今の本文から探し直す｡後の編集で消えた断片は数えず、行がずれても追える｡
+// 同じ断片が複数箇所にあればすべてを数える (どれを書いたかは transcript から決まらない)｡
+func FocusLines(src string, e EditedFile) map[int]bool {
+	if e.Whole {
+		return nil
+	}
+	lines := map[int]bool{}
+	for _, frag := range e.Fragments {
+		if frag == "" {
+			continue
+		}
+		// 末尾の改行は次の行を書いたことにはならない｡
+		span := strings.Count(strings.TrimSuffix(frag, "\n"), "\n")
+		for off := 0; ; {
+			i := strings.Index(src[off:], frag)
+			if i < 0 {
+				break
+			}
+			start := strings.Count(src[:off+i], "\n") + 1
+			for n := start; n <= start+span; n++ {
+				lines[n] = true
+			}
+			off += i + len(frag)
+		}
+	}
+	return lines
 }
 
 // hookOutput は Stop hook が解釈する JSON｡
@@ -182,9 +246,19 @@ func runGate(args []string) error {
 		return err
 	}
 
-	targets, skipped := selectTargets(edited, cfg, *maxFiles)
-	if len(targets) == 0 {
+	byPath := map[string]EditedFile{}
+	paths := make([]string, 0, len(edited))
+	for _, e := range edited {
+		byPath[e.Path] = e
+		paths = append(paths, e.Path)
+	}
+	selected, skipped := selectTargets(paths, cfg, *maxFiles)
+	if len(selected) == 0 {
 		return emit(hookOutput{})
+	}
+	targets := make([]EditedFile, 0, len(selected))
+	for _, p := range selected {
+		targets = append(targets, byPath[p])
 	}
 
 	findings, err := scanFiles(targets, rs)
@@ -237,7 +311,20 @@ func buildReason(findings []prose.Finding, skipped []string) string {
 		"外部へ出す文書なら proofread skill を続けて呼ぶ｡\n")
 	b.WriteString("\nこの指摘が面に合わない場合 (議事録・対話ログなど) は、" +
 		"該当ファイルの先頭に無効化コメントを置くか ~/.claude/writing-gate.json の exclude_extra に足す｡\n")
+	fmt.Fprintf(&b, "無効化コメントの書式: <!-- writing-gate-disable %s -->"+
+		" (ルール ID を省くと全ルールが無効になる)\n", strings.Join(errorRuleIDs(findings), " "))
 	return b.String()
+}
+
+// errorRuleIDs は block の原因になったルール ID を重複なく出現順で返す｡
+func errorRuleIDs(findings []prose.Finding) []string {
+	var ids []string
+	for _, f := range findings {
+		if f.Severity == prose.SeverityError && !slices.Contains(ids, f.RuleID) {
+			ids = append(ids, f.RuleID)
+		}
+	}
+	return ids
 }
 
 func emit(out hookOutput) error {

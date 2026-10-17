@@ -66,6 +66,26 @@ writing-gate gate --transcript PATH [--config PATH] [--rules PATH] [--max-files 
 `gate` が block を返すのは severity=error があるときだけ。warn は報告に載るが
 完了は止めない。
 
+### gate が指摘を出す範囲
+
+`gate` はそのセッションで書いた行にだけ指摘を出す。既存の文書に手を入れたとき、
+過去の行の指摘を今回の不備として出さないため。ファイル全体を見たいときは `scan` を使う。
+
+- `Write` はファイル全体を書いたものとして扱う
+- `Edit` / `MultiEdit` は `new_string` が今の本文に現れる行を書いた行とする。
+  後の編集で消えた断片は数えない。同じ断片が複数箇所にあれば全部を数える
+- 書いた本文を取り出せないツール (`NotebookEdit` など) はファイル全体を書いたものとして扱う
+
+集計ルールは数える範囲と指摘を出す範囲が違う。数えるのは文書全体で、指摘は書いた行に
+かかるものだけを出す。
+
+- `sentence-ending-repeat` は連続のどれかの文を書いていれば出す。行番号は連続の先頭を指すので、
+  書いていない行を指すことがある
+- `style-mix` は多数派を文書全体で決め、書いた行の少数派の文だけを例に挙げる
+- `metaphor-repeat` は文書全体で数え、書いた行に目印があれば出す
+
+block の reason には、原因になったルール ID を入れた無効化コメントの書式を載せる。
+
 ## ルールの置き場
 
 境界は「prh が `expected` を必須とするか」で決まる。置換先を書けない漏出フレーズは
@@ -174,7 +194,7 @@ Stop hook (hooks/stop-writing-gate.sh)
   └─ ${CLAUDE_PLUGIN_DATA}/bin/writing-gate gate --transcript <path>
        ├─ transcript から Write/Edit/MultiEdit/NotebookEdit の .md を拾う
        ├─ 除外と上限 (既定 20 件) を当てる
-       ├─ 点検する
+       ├─ 点検して、書いた行にかかる指摘だけを残す
        └─ error があれば {"decision":"block","reason":...} を出す
 ```
 
