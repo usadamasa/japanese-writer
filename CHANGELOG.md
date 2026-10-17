@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026.1017.0](https://github.com/usadamasa/japanese-writer/compare/2026.1011.0...2026.1017.0) - 2026-10-17
+
+- writing-gate: 本文に書いた実測日の注記を検出する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/51
+- ci: GitHub Actions の固定を pinact から gh-actions-lock へ移行する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/56
+- ci: gh-actions-lock を v0.2.0 へ上げ、ci-status-check の形を揃える by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/57
+- Crit レビューの言い回し指摘を prh / writing-gate のルールへ登録する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/58
+- 開発ツールの管理を aqua から nix の devShell へ移す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/60
+- feat(textlint): foreground の直訳「前景」を prh-prose で拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/61
+
 ## [2026.1011.0](https://github.com/usadamasa/japanese-writer/compare/2026.1010.1...2026.1011.0) - 2026-10-11
 
 - writing-gate: inline-enumeration で括弧内の読点区切りの列挙を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/49
