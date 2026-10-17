@@ -21,6 +21,7 @@
 │         └─ domain_check で差し込んだ用語 skill (任意)
 ├─ /japanese-writer:writing-feedback ── 言い回しを直されたとき
 │    └─ crit の approve 後の prompt (crit/on_finish_approved.md) からも呼ばれる
+├─ /japanese-writer:gate-off, gate-on ── このセッションの間だけ Stop hook の点検を止める・戻す
 ├─ (自動) SessionStart hook: writing-gate を data ディレクトリへビルド ── セッションを開くとき
 └─ (自動) Stop hook: writing-gate ── セッションを閉じるとき
 ```
@@ -33,6 +34,7 @@
 | skill | textlint-check | textlint による機械点検と自動修正。呼び出し元が `config_root` で config を切り替える | proofread の内側から呼ばれる。機械点検だけ欲しいときは単体でも呼べる |
 | skill | sanitize-artifacts | 対話で仕上げた成果物から、制作過程と却下した案の痕跡を取り除く | proofreader が点検の観点として読み込む。「これは消して」の後の作り直しでは単体で呼ぶ |
 | skill | writing-feedback | 言い回しへの指摘を prh のルールとして登録し、次から機械が拾えるようにする | ユーザーが言い回しを直したときに呼ぶ。crit の approve 後の prompt からも回る |
+| skill | gate-off / gate-on | このセッションの間だけ Stop hook の文章点検を止める・戻す。ファイルや設定には触れない | ユーザーが `/japanese-writer:gate-off` と `/japanese-writer:gate-on` で打つ。Claude が Skill ツールで呼んでも効かない |
 | agent | proofreader | proofread skill から呼ばれる添削担当の subagent | proofread が dispatch する。直接は呼ばない |
 | hook | SessionStart: prepare | writing-gate のビルドの入力が前回と違えば data ディレクトリへビルドし直し、crit の prompt を data へ複製する | 自動 (開始時) |
 | hook | Stop: writing-gate | セッションを閉じるときに、編集した `.md` を点検して重大な指摘があれば完了を止める | 自動 (完了時) |
