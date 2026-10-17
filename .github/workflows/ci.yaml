@@ -12,6 +12,7 @@ concurrency:
 permissions:
   contents: read
 
+# Go と lint・テストのツールは flake.nix の devShell から取る (setup-nix)。版の正本は flake.lock
 jobs:
   go-test:
     name: Go test
@@ -19,10 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      - uses: actions/setup-go@v6.4.0
-        with:
-          go-version-file: go.mod
-          cache: false
+      - uses: $/.github/actions/setup-nix
 
       - name: go build
         run: go build ./...
@@ -45,14 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      - uses: actions/setup-go@v6.4.0
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - uses: aquaproj/aqua-installer@v3.1.2
-        with:
-          aqua_version: v2.63.0
+      - uses: $/.github/actions/setup-nix
 
       # shellcheck は shellcheck job が担うので､ここは Go の lint だけを走らせる
       - name: Run golangci-lint
@@ -66,13 +57,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      - uses: aquaproj/aqua-installer@v3.1.2
-        with:
-          aqua_version: v2.63.0
+      - uses: $/.github/actions/setup-nix
 
       # 版を固定せず最新を入れる｡この job の目的は「今の Claude Code ランタイムが plugin を受理するか」を
       # 確かめること｡利用者側の Claude Code は自動更新されるので､固定版で通っても利用者の環境で
-      # 受理される保証にならない｡
+      # 受理される保証にならない｡npm はランナーのものを使う (devShell には node を入れていない)
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code@latest
 
@@ -85,9 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      - uses: aquaproj/aqua-installer@v3.1.2
-        with:
-          aqua_version: v2.63.0
+      - uses: $/.github/actions/setup-nix
 
       - name: Validate JSON / YAML against declared schemas
         run: task validate:schema
@@ -98,19 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      - uses: actions/setup-go@v6.4.0
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - uses: aquaproj/aqua-installer@v3.1.2
-        with:
-          aqua_version: v2.63.0
-
-      - name: Install bats-core
-        run: |
-          sudo apt-get update -q
-          sudo apt-get install -y bats
+      - uses: $/.github/actions/setup-nix
 
       - name: Run bats tests
         run: bats tests/
@@ -121,10 +96,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.3
 
-      # apt の shellcheck ではなく aqua で固定した版を使い､ローカルの task lint と結果を揃える
-      - uses: aquaproj/aqua-installer@v3.1.2
-        with:
-          aqua_version: v2.63.0
+      # apt の shellcheck ではなく devShell で固定した版を使い､ローカルの task lint と結果を揃える
+      - uses: $/.github/actions/setup-nix
 
       - name: Run shellcheck
         run: task lint:shell

@@ -5,9 +5,9 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/ci.yaml':
         - 'actions/checkout@v6.0.3'
-        - 'actions/setup-go@v6.4.0'
         - 'actions/upload-artifact@v7.0.1'
-        - 'aquaproj/aqua-installer@v3.1.2'
+        - 'determinatesystems/nix-installer-action@v23'
+        - 'nicknovitski/nix-develop@v1.2.1'
     '.github/workflows/tagpr.yaml':
         - 'actions/checkout@v6.0.3'
         - 'actions/create-github-app-token@v3.2.0'
@@ -23,21 +23,21 @@ dependencies:
         commit: 'sha1-bcd2ba49218906704ab6c1aa796996da409d3eb1'
         owner_id: 44036562
         repo_id: 642580244
-    'actions/setup-go@v6.4.0':
-        ref: 'v6.4.0'
-        commit: 'sha1-4a3601121dd01d1626a1e23e37211e3254c1c06c'
-        owner_id: 44036562
-        repo_id: 192624594
     'actions/upload-artifact@v7.0.1':
         ref: 'v7.0.1'
         commit: 'sha1-043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         owner_id: 44036562
         repo_id: 192625955
-    'aquaproj/aqua-installer@v3.1.2':
-        ref: 'v3.1.2'
-        commit: 'sha1-5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c'
-        owner_id: 95116411
-        repo_id: 400140776
+    'determinatesystems/nix-installer-action@v23':
+        ref: 'v23'
+        commit: 'sha1-3138316df39ed29be04236d7ffc686fa525866aa'
+        owner_id: 80991770
+        repo_id: 588678074
+    'nicknovitski/nix-develop@v1.2.1':
+        ref: 'v1.2.1'
+        commit: 'sha1-9be7cfb4b10451d3390a75dc18ad0465bed4932a'
+        owner_id: 151337
+        repo_id: 706956179
     'songmu/tagpr@v1.20.3':
         ref: 'v1.20.3'
         commit: 'sha1-7ebae2dcc300132baa7cc9dd108c8923b07fc366'

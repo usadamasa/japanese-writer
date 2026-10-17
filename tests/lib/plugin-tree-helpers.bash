@@ -34,7 +34,7 @@ setup_plugin_tree() {
   MOCK_PATH="$WORKDIR/mockbin"
   mkdir -p "$MOCK_PATH"
   # jq は本物を使う (結果 JSON の読み取りに要る)。ディレクトリごと PATH に足すと
-  # 同居する npx や crit まで見えてしまうので、jq だけを持ち込む。aqua の shim は
+  # 同居する npx や crit まで見えてしまうので、jq だけを持ち込む。shim 経由の jq は
   # 元の PATH が無いと本体を探せないため、symlink ではなく元の PATH で起動する wrapper にする
   printf '#!/bin/bash\nPATH=%q exec jq "$@"\n' "$PATH" >"$MOCK_PATH/jq"
   chmod +x "$MOCK_PATH/jq"
