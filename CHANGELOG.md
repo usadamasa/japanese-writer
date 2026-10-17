@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1017.1](https://github.com/usadamasa/japanese-writer/compare/2026.1017.0...2026.1017.1) - 2026-10-17
+
+- feat(textlint): 他 skill の節名を指す参照を prh-prose で拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/62
+- fix(writing-gate): gate の指摘をセッション中に書いた行へ絞る by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/64
+- fix(writing-gate): 同じ指摘を 1 回だけ出し、gate-off でセッション単位に止める by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/66
+
 ## [2026.1017.0](https://github.com/usadamasa/japanese-writer/compare/2026.1011.0...2026.1017.0) - 2026-10-17
 
 - writing-gate: 本文に書いた実測日の注記を検出する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/51
