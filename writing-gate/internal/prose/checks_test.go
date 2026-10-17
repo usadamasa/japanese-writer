@@ -284,6 +284,95 @@ func TestCheckStyleMix(t *testing.T) {
 	})
 }
 
+// parseFocused は Focus を指定した文書を作る｡
+func parseFocused(src string, lines ...int) *Document {
+	doc := ParseDocument("t.md", src)
+	doc.Focus = map[int]bool{}
+	for _, n := range lines {
+		doc.Focus[n] = true
+	}
+	return doc
+}
+
+func TestCheckFocus(t *testing.T) {
+	rs := loadTestRules(t)
+
+	t.Run("Focus の外の漏出フレーズは拾わない", func(t *testing.T) {
+		src := "ご指示のとおり、設定を分割した｡\n\n原本は config/ に置く｡\n"
+		if got := Check(parseFocused(src, 3), rs); hasRule(got, "process-leak") {
+			t.Errorf("process-leak は出ないはず: %v", findingIDs(got))
+		}
+		if got := Check(parseFocused(src, 1), rs); !hasRule(got, "process-leak") {
+			t.Errorf("process-leak を検出するはず: %v", findingIDs(got))
+		}
+	})
+
+	t.Run("語尾の連続は末尾の文だけが Focus でも拾う", func(t *testing.T) {
+		src := "設定は原本から生成している｡\n" +
+			"生成物はコミットしている｡\n" +
+			"検証は pre-commit で実施している｡\n\n" +
+			"原本は config/ に置く｡\n"
+		if got := Check(parseFocused(src, 3), rs); !hasRule(got, "sentence-ending-repeat") {
+			t.Errorf("sentence-ending-repeat を検出するはず: %v", findingIDs(got))
+		}
+		if got := Check(parseFocused(src, 5), rs); hasRule(got, "sentence-ending-repeat") {
+			t.Errorf("sentence-ending-repeat は出ないはず: %v", findingIDs(got))
+		}
+	})
+
+	t.Run("文体の混在は例の上限より後ろの Focus の文も拾う", func(t *testing.T) {
+		src := strings.Repeat("設定を生成する｡\n", 11) + strings.Repeat("この節は補足です｡\n", 6)
+		got := Check(parseFocused(src, 17), rs)
+		var lines []int
+		for _, f := range got {
+			if f.RuleID == "style-mix" {
+				lines = append(lines, f.Line)
+			}
+		}
+		if len(lines) != 1 || lines[0] != 17 {
+			t.Errorf("style-mix の行 = %v, want [17]", lines)
+		}
+		if got := Check(parseFocused(src, 1), rs); hasRule(got, "style-mix") {
+			t.Errorf("多数派の行だけが Focus なら style-mix は出ないはず: %v", findingIDs(got))
+		}
+	})
+
+	t.Run("比喩の反復は Focus の行に目印があれば拾う", func(t *testing.T) {
+		src := "いわば設定の原本である｡\nたとえるなら金型に近い｡\n言ってみれば工場のようなものだ｡\n原本は config/ に置く｡\n"
+		got := Check(parseFocused(src, 3), rs)
+		if !hasRule(got, "metaphor-repeat") {
+			t.Errorf("metaphor-repeat を検出するはず: %v", findingIDs(got))
+		}
+		if got := Check(parseFocused(src, 4), rs); hasRule(got, "metaphor-repeat") {
+			t.Errorf("metaphor-repeat は出ないはず: %v", findingIDs(got))
+		}
+	})
+
+	t.Run("Focus の外の表示されない太字は拾わない", func(t *testing.T) {
+		src := "次に**「文書の立場」**を決める｡\n\n原本は config/ に置く｡\n"
+		if got := Check(parseFocused(src, 3), rs); hasRule(got, "bold-not-rendered") {
+			t.Errorf("bold-not-rendered は出ないはず: %v", findingIDs(got))
+		}
+		if got := Check(parseFocused(src, 1), rs); !hasRule(got, "bold-not-rendered") {
+			t.Errorf("bold-not-rendered を検出するはず: %v", findingIDs(got))
+		}
+	})
+
+	t.Run("Focus が空なら何も拾わない", func(t *testing.T) {
+		src := "ご指示のとおり、設定を分割した｡\n"
+		if got := Check(parseFocused(src), rs); len(got) != 0 {
+			t.Errorf("findings = %v, want 空", findingIDs(got))
+		}
+	})
+
+	t.Run("Focus が nil なら文書全体を見る", func(t *testing.T) {
+		src := "ご指示のとおり、設定を分割した｡\n"
+		if got := Check(ParseDocument("t.md", src), rs); !hasRule(got, "process-leak") {
+			t.Errorf("process-leak を検出するはず: %v", findingIDs(got))
+		}
+	})
+}
+
 func TestCheckMetaphorRepeat(t *testing.T) {
 	rs := loadTestRules(t)
 
