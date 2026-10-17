@@ -106,14 +106,15 @@ proofread は汎用の機械点検と文章規範だけを持つ。書き手ご�
 
 plugin を使うだけなら「前提」節のツールで足りる。このリポジトリで開発するときは、加えて次を用意する。
 
-- [aqua](https://aquaproj.github.io/)。task・golangci-lint・shellcheck・jv の版を `aqua.yaml` で固定している。
-  `.envrc` が shim を張って `$(aqua root-dir)/bin` を PATH に足すので、direnv を入れて `direnv allow` する。
-  direnv を使わないなら `aqua i -l` を打ち、同じパスを自分で PATH に通す
-- [jv](https://github.com/santhosh-tekuri/jsonschema) (`task validate` が JSON / YAML を宣言された schema で検証するのに使う)。
-  aqua で入るので個別のインストールは要らない。Homebrew には formula が無く、aqua を使わない場合は
-  `go install github.com/santhosh-tekuri/jsonschema/cmd/jv@latest` で入れる
-- [bats-core](https://github.com/bats-core/bats-core) (`task test` が使う)
+- flakes を有効にした [Nix](https://nixos.org/)。Go・task・golangci-lint・shellcheck・bats・jq・
+  [jv](https://github.com/santhosh-tekuri/jsonschema) は `flake.nix` の devShell で揃え、版は `flake.lock` が固定する
+  nixpkgs で決まる。nixpkgs に無い jv は `flake.nix` の中でソースからビルドする。CI も同じ flake を使う
+- [direnv](https://direnv.net/) と [nix-direnv](https://github.com/nix-community/nix-direnv) (任意)。`.envrc` が
+  `use flake` で devShell を読み込むので `direnv allow` する。direnv を使わないなら `nix develop` で devShell に入る
 - Claude Code CLI (`task validate` が `claude plugin validate` を呼ぶ)
+
+`go.mod` の `go` ディレクティブは devShell の `go_1_26` と揃え、`GOTOOLCHAIN=local` でずれたら失敗させる。
+ツールの版を上げるときは `nix flake update` で `flake.lock` を更新する。
 
 CI と同じ確認は task で手元でも通せる。
 

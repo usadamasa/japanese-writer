@@ -1,0 +1,12 @@
+name: 'Setup Nix devShell'
+description: 'Install Nix and load the flake.nix devShell into the following steps'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v23
+
+    # devShell の PATH と env を GITHUB_PATH / GITHUB_ENV に書くので、以後の step は素で動く
+    - name: Load devShell
+      uses: nicknovitski/nix-develop@v1.2.1
