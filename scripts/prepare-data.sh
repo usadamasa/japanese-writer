@@ -13,6 +13,10 @@ set -euo pipefail
 # バイナリが残っていればビルドを省く。SessionStart hook はこちらで呼ぶ。
 # 入力の中身で判定するので、版の文字列を上げ忘れたローカルの変更でもビルドし直す。
 #
+# --check を付けると何も書かずに点検だけする。--if-stale がビルドを省く状態で、置かれた
+# バイナリが検証に通り、crit の複製が今の版と同じなら 0、欠けがあれば項目を挙げて 1 を返す。
+# sandbox の中から準備済みかを確かめるのに使う。
+#
 # 検証は exit 0 だけでは足りない。ルールは go:embed でバイナリへ焼き込まれるので、古い
 # バイナリでも scan は成功する。既知の process-leak パターンが error として出ることまで見る。
 # 検証に通るまで data の bin/ には触れないので、失敗しても前回のバイナリが残る。
@@ -24,8 +28,9 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LEAK_PROBE='ご要望に従い、この節を書き直しました｡'
 
 usage() {
-  printf 'usage: prepare-data.sh [--if-stale]\n' >&2
+  printf 'usage: prepare-data.sh [--if-stale | --check]\n' >&2
   printf '  --if-stale  ビルドの入力が前回と同じで、バイナリが残っていればビルドしない\n' >&2
+  printf '  --check     何も書かずに、準備が済んでいるかだけを点検する\n' >&2
 }
 
 say() {
@@ -38,10 +43,15 @@ die() {
 }
 
 IF_STALE=false
+CHECK=false
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --if-stale)
       IF_STALE=true
+      shift
+      ;;
+    --check)
+      CHECK=true
       shift
       ;;
     --help | -h)
@@ -65,23 +75,9 @@ esac
 BIN_DIR="$DATA/bin"
 GATE="$BIN_DIR/writing-gate"
 STAMP="$BIN_DIR/.inputs.cksum"
-
-# ---------------------------------------------------------------------------
-# 1. crit の prompt
-# ---------------------------------------------------------------------------
 CRIT_SRC="$ROOT/crit/on_finish_approved.md"
 CRIT_DST="$DATA/crit/on_finish_approved.md"
-if ! cmp -s "$CRIT_SRC" "$CRIT_DST"; then
-  mkdir -p "$DATA/crit" || die "ディレクトリを作成できません: $DATA/crit"
-  # リンク越しに読まれている最中でも欠けないよう、隣へ書いてから置き換える
-  cp "$CRIT_SRC" "$CRIT_DST.tmp" || die "crit の prompt を複製できません: $CRIT_DST"
-  mv -f "$CRIT_DST.tmp" "$CRIT_DST" || die "crit の prompt を置き換えられません: $CRIT_DST"
-  say "crit の prompt を更新しました: $CRIT_DST"
-fi
 
-# ---------------------------------------------------------------------------
-# 2. writing-gate
-# ---------------------------------------------------------------------------
 # input_cksum -> ビルドの入力の cksum を 1 行で返す。パスは root からの相対にして、
 # 版ごとに置き場が変わっても中身が同じなら同じ値にする
 input_cksum() {
@@ -94,6 +90,75 @@ input_cksum() {
   ) | cksum
 }
 
+# verify_gate BIN -> BIN が既知の process-leak パターンを error として拾えば、その件数を出して 0 を返す。
+# 拾えなければ理由を stderr へ出して 1 を返す。probe はプロセス置換で渡し、ファイルを書かない
+verify_gate() {
+  local bin="$1" scan_out parse_err errors
+  if ! scan_out=$("$bin" scan --format json <(printf '# probe\n\n%s\n' "$LEAK_PROBE") 2>&1); then
+    printf '%s\n' "$scan_out" >&2
+    printf 'prepare-data: writing-gate の実行に失敗しました: %s\n' "$bin" >&2
+    return 1
+  fi
+  if ! parse_err=$(printf '%s' "$scan_out" | jq empty 2>&1); then
+    printf '%s\n' "$scan_out" >&2
+    printf 'prepare-data: writing-gate scan の出力が JSON ではありません: %s\n' "$parse_err" >&2
+    return 1
+  fi
+  errors=$(printf '%s' "$scan_out" | jq '.errors // 0')
+  if [ "$errors" -lt 1 ]; then
+    printf 'prepare-data: writing-gate が既知の process-leak パターンを拾いません (errors=%s)｡埋め込みルールが壊れています: %s\n' \
+      "$errors" "$bin" >&2
+    return 1
+  fi
+  printf '%s\n' "$errors"
+}
+
+# ---------------------------------------------------------------------------
+# --check: 何も書かずに点検する
+# ---------------------------------------------------------------------------
+if [ "$CHECK" = true ]; then
+  command -v jq >/dev/null || die "jq が見つかりません (writing-gate の検証に使います)"
+  if ! inputs=$(input_cksum); then
+    die "ビルドの入力の cksum を計算できません: $ROOT"
+  fi
+  gaps=()
+  if [ ! -x "$GATE" ]; then
+    gaps+=("writing-gate がありません: $GATE")
+  else
+    if [ ! -f "$STAMP" ] || [ "$(cat "$STAMP")" != "$inputs" ]; then
+      gaps+=("ビルドの入力 (Go のソースと埋め込みルール) が前回のビルドと違います: $GATE")
+    fi
+    if ! verify_gate "$GATE" >/dev/null; then
+      gaps+=("置かれた writing-gate が検証に通りません (process-leak を拾わない): $GATE")
+    fi
+  fi
+  if ! cmp -s "$CRIT_SRC" "$CRIT_DST"; then
+    gaps+=("data の crit の prompt が今の版と違います: $CRIT_DST")
+  fi
+  if [ "${#gaps[@]}" -gt 0 ]; then
+    for gap in "${gaps[@]}"; do
+      printf 'prepare-data: 欠け: %s\n' "$gap" >&2
+    done
+    exit 1
+  fi
+  say "点検 ok: writing-gate と crit の prompt は準備済みです: $GATE"
+  exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# 1. crit の prompt
+# ---------------------------------------------------------------------------
+if ! cmp -s "$CRIT_SRC" "$CRIT_DST"; then
+  mkdir -p "$DATA/crit" || die "ディレクトリを作成できません: $DATA/crit"
+  # リンク越しに読まれている最中でも欠けないよう、隣へ書いてから置き換える
+  cp "$CRIT_SRC" "$CRIT_DST.tmp" || die "crit の prompt を複製できません: $CRIT_DST"
+  mv -f "$CRIT_DST.tmp" "$CRIT_DST" || die "crit の prompt を置き換えられません: $CRIT_DST"
+  say "crit の prompt を更新しました: $CRIT_DST"
+fi
+
+# ---------------------------------------------------------------------------
+# 2. writing-gate
+# ---------------------------------------------------------------------------
 if ! inputs=$(input_cksum); then
   die "ビルドの入力の cksum を計算できません: $ROOT"
 fi
@@ -115,19 +180,8 @@ if ! go build -C "$ROOT" -o "$WORK_DIR/" ./...; then
 fi
 [ -x "$WORK_DIR/writing-gate" ] || die "ビルドは成功しましたが writing-gate がありません"
 
-PROBE="$WORK_DIR/probe.md"
-printf '# probe\n\n%s\n' "$LEAK_PROBE" >"$PROBE"
-if ! scan_out=$("$WORK_DIR/writing-gate" scan --format json "$PROBE" 2>&1); then
-  printf '%s\n' "$scan_out" >&2
-  die "ビルドした writing-gate の実行に失敗しました"
-fi
-if ! parse_err=$(printf '%s' "$scan_out" | jq empty 2>&1); then
-  printf '%s\n' "$scan_out" >&2
-  die "writing-gate scan の出力が JSON ではありません: $parse_err"
-fi
-errors=$(printf '%s' "$scan_out" | jq '.errors // 0')
-if [ "$errors" -lt 1 ]; then
-  die "ビルドした writing-gate が既知の process-leak パターンを拾いません (errors=$errors)｡埋め込みルールが壊れています"
+if ! errors=$(verify_gate "$WORK_DIR/writing-gate"); then
+  die "ビルドした writing-gate の検証に失敗しました｡data の bin/ は前回のまま残します"
 fi
 
 # 置き換えの途中で Stop hook が古い stamp と新しいバイナリを組み合わせて見ても害はない

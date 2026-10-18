@@ -8,6 +8,9 @@ set -euo pipefail
 #   2. prepare-data.sh で writing-gate を data ディレクトリへビルドし直し、検証する
 #   3. --crit を付けたときだけ、crit の approve 後 prompt を data の複製へリンクする
 #
+# --check を付けると 2 と 3 を書き込み無しの点検 (prepare-data.sh --check と、--crit 時はリンクの確認) に
+# 置き換える。hook の準備が済んだ端末なら、sandbox の中からこれだけで完了と判定できる。
+#
 # data ディレクトリは CLAUDE_PLUGIN_DATA で受け取る。hook には Claude Code が渡すが、
 # Bash tool には渡らないので、SKILL.md が置換した値を前置きして呼ぶ。
 #
@@ -20,8 +23,10 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CRIT_PROMPT_DST="$HOME/.crit/prompts/on_finish_approved.md"
 
 usage() {
-  printf 'usage: CLAUDE_PLUGIN_DATA=<data dir> setup.sh [--crit]\n' >&2
-  printf '  --crit  crit の approve 後 prompt (~/.crit/prompts/on_finish_approved.md) を plugin の data の複製へリンクする\n' >&2
+  printf 'usage: CLAUDE_PLUGIN_DATA=<data dir> setup.sh [--check] [--crit]\n' >&2
+  printf '  --check  何も書かずに、準備が済んでいるかだけを点検する\n' >&2
+  printf '  --crit   crit の approve 後 prompt (~/.crit/prompts/on_finish_approved.md) を plugin の data の複製へリンクする\n' >&2
+  printf '           --check と併せると、リンクが済んでいるかを点検する\n' >&2
 }
 
 say() {
@@ -34,10 +39,15 @@ die() {
 }
 
 LINK_CRIT=false
+CHECK=false
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --crit)
       LINK_CRIT=true
+      shift
+      ;;
+    --check)
+      CHECK=true
       shift
       ;;
     --help | -h)
@@ -74,6 +84,46 @@ for cmd in go npx jq; do
 done
 if [ "${#missing[@]}" -gt 0 ]; then
   die "前提コマンドが不足しています: ${missing[*]} (go は writing-gate のビルド、npx と jq は textlint の点検に使う)"
+fi
+
+# ---------------------------------------------------------------------------
+# --check: 2 と 3 を書き込み無しの点検に置き換える
+# ---------------------------------------------------------------------------
+# crit_linked -> ~/.crit の prompt が data の複製を指していれば 0 を返す
+crit_linked() {
+  [ -L "$CRIT_PROMPT_DST" ] && [ "$(readlink "$CRIT_PROMPT_DST")" = "$CRIT_PROMPT_SRC" ]
+}
+
+# suggest_crit_link -> --crit 無しのとき、crit があればリンクを提案する
+suggest_crit_link() {
+  command -v crit >/dev/null || return 0
+  if crit_linked; then
+    say "crit: リンク済み ($CRIT_PROMPT_DST)"
+    return 0
+  fi
+  say "crit: 見つかりました｡approve 後の prompt を plugin のものにするなら --crit を付けて実行してください"
+}
+
+if [ "$CHECK" = true ]; then
+  ok=true
+  if ! "$SCRIPT_DIR/prepare-data.sh" --check; then
+    ok=false
+  fi
+  if [ "$LINK_CRIT" = true ]; then
+    if crit_linked; then
+      say "crit: リンク済み ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
+    else
+      say "crit: $CRIT_PROMPT_DST は $CRIT_PROMPT_SRC を指していません"
+      ok=false
+    fi
+  else
+    suggest_crit_link
+  fi
+  if [ "$ok" != true ]; then
+    die "点検で欠けが見つかりました｡--check を外して実行すると準備し直します"
+  fi
+  say "点検 ok: 書き込みの要る作業はありません"
+  exit 0
 fi
 
 # ---------------------------------------------------------------------------
@@ -119,11 +169,6 @@ stale_plugin_link() {
   return 1
 }
 
-# crit_linked -> ~/.crit の prompt が data の複製を指していれば 0 を返す
-crit_linked() {
-  [ -L "$CRIT_PROMPT_DST" ] && [ "$(readlink "$CRIT_PROMPT_DST")" = "$CRIT_PROMPT_SRC" ]
-}
-
 # link_crit_prompt -> --crit の処理。状態ごとに報告して抜ける
 link_crit_prompt() {
   local current link_err
@@ -158,16 +203,6 @@ link_crit_prompt() {
   fi
   say "crit: $CRIT_PROMPT_DST は既に別の場所を指しているので触りません: $current"
   say "crit: plugin のファイルへ向けるなら、そのリンクを消してから --crit をもう一度実行してください"
-}
-
-# suggest_crit_link -> --crit 無しのとき、crit があればリンクを提案する
-suggest_crit_link() {
-  command -v crit >/dev/null || return 0
-  if crit_linked; then
-    say "crit: リンク済み ($CRIT_PROMPT_DST)"
-    return 0
-  fi
-  say "crit: 見つかりました｡approve 後の prompt を plugin のものにするなら --crit を付けて実行してください"
 }
 
 if [ "$LINK_CRIT" = true ]; then
