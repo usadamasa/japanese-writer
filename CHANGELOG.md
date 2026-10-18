@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1018.1](https://github.com/usadamasa/japanese-writer/compare/2026.1018.0...2026.1018.1) - 2026-10-18
+
+- fix(setup): 今の版と同じ内容を指す crit のリンクをリンク済みとする by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/71
+
 ## [2026.1018.0](https://github.com/usadamasa/japanese-writer/compare/2026.1017.1...2026.1018.0) - 2026-10-18
 
 - setup.sh に書き込みを伴わない点検モード --check を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/69
