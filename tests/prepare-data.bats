@@ -168,6 +168,83 @@ teardown() {
 }
 
 # =============================================================================
+# --check
+# =============================================================================
+
+# freeze_writes -> data と HOME と TMPDIR を書き込み禁止にする。--check が何か書けば失敗する
+freeze_writes() {
+  mkdir -p "$WORKDIR/ro-tmp"
+  chmod -R a-w "$DATA" "$HOME" "$WORKDIR/ro-tmp"
+  export TMPDIR="$WORKDIR/ro-tmp"
+}
+
+@test "--check は準備済みなら何も書かずに exit 0 し、ビルドしない" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 0 ]
+  [ "$(go_calls)" -eq 1 ]
+}
+
+@test "--check はバイナリが無ければその旨を出して exit 1 し、data を作らない" {
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"writing-gate"* ]]
+  [ "$(go_calls)" -eq 0 ]
+  [ ! -e "$DATA" ]
+}
+
+@test "--check はビルドの入力が前回と違えば exit 1 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  printf '\n' >>"$ROOT/writing-gate/internal/rules/rules.json"
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"前回のビルドと違"* ]]
+  [ "$(go_calls)" -eq 1 ]
+}
+
+@test "--check は置かれたバイナリが既知の漏出パターンを拾えなければ exit 1 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  printf '#!/bin/bash\nprintf "%%s\\n" "{\\"errors\\":0}"\n' >"$DATA/bin/writing-gate"
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"process-leak"* ]]
+}
+
+@test "--check は data の crit の prompt が古ければ exit 1 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  printf '\n追記\n' >>"$ROOT/crit/on_finish_approved.md"
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"crit"* ]]
+  [ "$(go_calls)" -eq 1 ]
+}
+
+@test "--check は欠けが複数あればすべて出す" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  printf '\n' >>"$ROOT/writing-gate/internal/rules/rules.json"
+  printf '\n追記\n' >>"$ROOT/crit/on_finish_approved.md"
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"前回のビルドと違"* ]]
+  [[ "$output" == *"crit"* ]]
+}
+
+# =============================================================================
 # crit の prompt
 # =============================================================================
 

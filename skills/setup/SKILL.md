@@ -15,15 +15,26 @@ writing-gate のビルドは、普段は SessionStart hook が plugin の data �
 (`${CLAUDE_PLUGIN_DATA}`) へ自動で行う。install と update の後に本 skill を呼ぶ必要はない。
 呼ぶのは、自動の準備が失敗したときと crit のリンクを張るとき。
 
-## Step 1: スクリプトを実行する
+## Step 1: 点検し、欠けがあれば準備し直す
 
 data ディレクトリは Bash の環境変数に入っていないので、前置きして渡す。
+まず `--check` で点検する。何も書き込まないので、sandbox の中でもそのまま動く。
+
+```bash
+CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" --check
+```
+
+stdout と stderr をそのまま読む。
+
+- 終了コード 0: hook の準備が済んでいる。ビルドし直さずに Step 3 へ進む
+- それ以外: `欠け:` の行と前提コマンドの結果を読んで利用者へ伝え、`--check` を外して準備し直す
 
 ```bash
 CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh"
 ```
 
-stdout と stderr をそのまま読む。終了コード 0 なら Step 3 へ、それ以外は Step 2 へ。
+準備し直した結果は、終了コード 0 なら Step 3 へ、それ以外は Step 2 へ進む。
+前提コマンドが欠けて `--check` が落ちたときは、準備し直しても同じ所で止まるので Step 2 の表に従う。
 
 ## Step 2: 失敗の種類ごとに返す
 
@@ -49,6 +60,9 @@ stdout と stderr をそのまま読む。終了コード 0 なら Step 3 へ、
 CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" --crit
 ```
 
+`--crit` は `~/.crit` へ書き込むので、sandbox に拒まれることがある。`へ書き込めません` が出たら Step 2 の表のとおり
+`!` の行を示す。
+
 出力に `crit: 見つかりました` が無ければ尋ねない。`crit: リンク済み` なら済んでいる。
 `既に別の場所を指しているので触りません` が出たら、その指し先を伝えて利用者の判断に任せる。
 
@@ -57,6 +71,7 @@ CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.
 最後の実行の出力を要約して返す。
 
 - 前提コマンドの結果
+- 点検だけで済んだか、準備し直したか
 - `writing-gate` のパス (`${CLAUDE_PLUGIN_DATA}/bin/writing-gate`) と検証の結果
 - crit のリンクの状態
 - plugin を更新しても再実行は要らないこと (次のセッションの開始時に hook が準備し直す)
