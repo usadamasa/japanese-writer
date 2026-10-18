@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1018.0](https://github.com/usadamasa/japanese-writer/compare/2026.1017.1...2026.1018.0) - 2026-10-18
+
+- setup.sh に書き込みを伴わない点検モード --check を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/69
+
 ## [2026.1017.1](https://github.com/usadamasa/japanese-writer/compare/2026.1017.0...2026.1017.1) - 2026-10-17
 
 - feat(textlint): 他 skill の節名を指す参照を prh-prose で拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/62
