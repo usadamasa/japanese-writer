@@ -173,6 +173,80 @@ teardown() {
 }
 
 # =============================================================================
+# --check
+# =============================================================================
+
+# freeze_writes -> data と HOME と TMPDIR を書き込み禁止にする。--check が何か書けば失敗する
+freeze_writes() {
+  mkdir -p "$WORKDIR/ro-tmp"
+  chmod -R a-w "$DATA" "$HOME" "$WORKDIR/ro-tmp"
+  export TMPDIR="$WORKDIR/ro-tmp"
+}
+
+@test "--check は準備済みなら書き込みもビルドもせずに exit 0 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 0 ]
+  [ "$(go_calls)" -eq 1 ]
+  [[ "$output" != *"! CLAUDE_PLUGIN_DATA="* ]]
+}
+
+@test "--check は準備が済んでいなければ欠けを出して exit 1 し、! 前置のコマンドを出さない" {
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"writing-gate"* ]]
+  [[ "$output" != *"! CLAUDE_PLUGIN_DATA="* ]]
+  [ "$(go_calls)" -eq 0 ]
+  [ ! -e "$DATA" ]
+}
+
+@test "--check でも前提コマンドが無ければ exit 1 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  rm "$MOCK_PATH/npx"
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"npx"* ]]
+}
+
+@test "--check は crit のリンクが無くても失敗にせず、--crit を案内する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  mock_cmd crit
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"crit: 見つかりました"* ]]
+  [ ! -e "$CRIT_DST" ]
+}
+
+@test "--check --crit は crit のリンクが無ければ exit 1 し、張らない" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check --crit
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"$CRIT_DST"* ]]
+  [ ! -e "$CRIT_DST" ]
+}
+
+@test "--check --crit はリンク済みなら exit 0 する" {
+  run "$SCRIPT_PATH" --crit
+  [ "$status" -eq 0 ]
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check --crit
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"リンク済み"* ]]
+}
+
+# =============================================================================
 # 引数
 # =============================================================================
 
