@@ -64,6 +64,8 @@ CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.
 `!` の行を示す。
 
 出力に `crit: 見つかりました` が無ければ尋ねない。`crit: リンク済み` なら済んでいる。
+リンクの指し先が plugin の data の複製でなくても (plugin の clone など)、今の版と同じ内容なら `crit: リンク済み` になる。
+`crit: 見つかりました` が出るのは、リンクが無いか、指し先の内容が今の版と違うときだけ。
 `既に別の場所を指しているので触りません` が出たら、その指し先を伝えて利用者の判断に任せる。
 
 ## Step 4: 報告する
