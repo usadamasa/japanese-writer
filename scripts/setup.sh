@@ -26,7 +26,7 @@ usage() {
   printf 'usage: CLAUDE_PLUGIN_DATA=<data dir> setup.sh [--check] [--crit]\n' >&2
   printf '  --check  何も書かずに、準備が済んでいるかだけを点検する\n' >&2
   printf '  --crit   crit の approve 後 prompt (~/.crit/prompts/on_finish_approved.md) を plugin の data の複製へリンクする\n' >&2
-  printf '           --check と併せると、リンクが済んでいるかを点検する\n' >&2
+  printf '           --check と併せると、今の版と同じ内容のファイルへリンクが済んでいるかを点検する\n' >&2
 }
 
 say() {
@@ -94,11 +94,17 @@ crit_linked() {
   [ -L "$CRIT_PROMPT_DST" ] && [ "$(readlink "$CRIT_PROMPT_DST")" = "$CRIT_PROMPT_SRC" ]
 }
 
+# crit_prompt_current -> ~/.crit の prompt が、指し先を問わず今の版と同じ内容のファイルへのリンクなら 0 を返す。
+# 利用者が plugin の clone へ張ったリンクを、--crit で data の複製へ張り替えさせないための判定
+crit_prompt_current() {
+  [ -L "$CRIT_PROMPT_DST" ] && cmp -s "$CRIT_PROMPT_DST" "$ROOT/crit/on_finish_approved.md"
+}
+
 # suggest_crit_link -> --crit 無しのとき、crit があればリンクを提案する
 suggest_crit_link() {
   command -v crit >/dev/null || return 0
-  if crit_linked; then
-    say "crit: リンク済み ($CRIT_PROMPT_DST)"
+  if crit_prompt_current; then
+    say "crit: リンク済み ($CRIT_PROMPT_DST -> $(readlink "$CRIT_PROMPT_DST"))"
     return 0
   fi
   say "crit: 見つかりました｡approve 後の prompt を plugin のものにするなら --crit を付けて実行してください"
@@ -110,10 +116,10 @@ if [ "$CHECK" = true ]; then
     ok=false
   fi
   if [ "$LINK_CRIT" = true ]; then
-    if crit_linked; then
-      say "crit: リンク済み ($CRIT_PROMPT_DST -> $CRIT_PROMPT_SRC)"
+    if crit_prompt_current; then
+      say "crit: リンク済み ($CRIT_PROMPT_DST -> $(readlink "$CRIT_PROMPT_DST"))"
     else
-      say "crit: $CRIT_PROMPT_DST は $CRIT_PROMPT_SRC を指していません"
+      say "crit: $CRIT_PROMPT_DST は今の版と同じ内容のファイルを指していません"
       ok=false
     fi
   else
@@ -192,6 +198,11 @@ link_crit_prompt() {
       die_unwritable "$CRIT_PROMPT_DST" "$link_err"
     fi
     say "crit: 版ごとの置き場へのリンクを張り替えました ($current -> $CRIT_PROMPT_SRC)"
+    return 0
+  fi
+
+  if crit_prompt_current; then
+    say "crit: リンク済み ($CRIT_PROMPT_DST -> $(readlink "$CRIT_PROMPT_DST")、今の版と同じ内容)"
     return 0
   fi
 
