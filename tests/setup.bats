@@ -18,6 +18,20 @@ setup() {
 
 teardown() {
   teardown_plugin_tree
+  if [ -n "${CLONE:-}" ]; then
+    rm -rf "$CLONE"
+  fi
+}
+
+# link_crit_to_clone -> 利用者の clone を模した場所の crit/on_finish_approved.md へ crit の prompt を張り、
+# CLONE_PROMPT にそのパスを入れる。ファイルの中身は呼び出し側が書く。
+# WORKDIR の配下に置くと setup.sh が更新前の plugin の置き場と見なすので、別の一時ディレクトリに置く
+link_crit_to_clone() {
+  CLONE=$(mktemp -d "${TMPDIR:-/tmp}/clone-test.XXXXXX")
+  CLONE=$(cd "$CLONE" && pwd)
+  CLONE_PROMPT="$CLONE/crit/on_finish_approved.md"
+  mkdir -p "$HOME/.crit/prompts" "$CLONE/crit"
+  ln -s "$CLONE_PROMPT" "$CRIT_DST"
 }
 
 # =============================================================================
@@ -139,6 +153,16 @@ teardown() {
   [ "$(readlink "$CRIT_DST")" = "$DATA/crit/on_finish_approved.md" ]
 }
 
+@test "--crit で plugin の外にある今の版と同じ内容のファイルを指すリンクは、張り替えずにリンク済みとする" {
+  link_crit_to_clone
+  cp "$ROOT/crit/on_finish_approved.md" "$CLONE_PROMPT"
+
+  run "$SCRIPT_PATH" --crit
+  [ "$status" -eq 0 ]
+  [ "$(readlink "$CRIT_DST")" = "$CLONE_PROMPT" ]
+  [[ "$output" == *"crit: リンク済み"* ]]
+}
+
 @test "--crit で指し先が消えたリンクは張り替える" {
   mkdir -p "$HOME/.crit/prompts"
   ln -s "$WORKDIR/gone/on_finish_approved.md" "$CRIT_DST"
@@ -234,6 +258,40 @@ freeze_writes() {
   [ "$status" -eq 1 ]
   [[ "$output" == *"$CRIT_DST"* ]]
   [ ! -e "$CRIT_DST" ]
+}
+
+@test "--check は plugin の外にある今の版と同じ内容のファイルを指すリンクをリンク済みとし、--crit を案内しない" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  mock_cmd crit
+  link_crit_to_clone
+  cp "$ROOT/crit/on_finish_approved.md" "$CLONE_PROMPT"
+  freeze_writes
+
+  for args in "--check" "--check --crit"; do
+    # shellcheck disable=SC2086 # 引数を語に分けて渡すため
+    run "$SCRIPT_PATH" $args
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"crit: リンク済み"* ]]
+    [[ "$output" != *"crit: 見つかりました"* ]]
+  done
+  [ "$(readlink "$CRIT_DST")" = "$CLONE_PROMPT" ]
+}
+
+@test "--check は今の版と内容が違うファイルを指すリンクなら --crit を案内し、--check --crit は exit 1 する" {
+  run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  mock_cmd crit
+  link_crit_to_clone
+  printf 'old\n' >"$CLONE_PROMPT"
+  freeze_writes
+
+  run "$SCRIPT_PATH" --check
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"crit: 見つかりました"* ]]
+
+  run "$SCRIPT_PATH" --check --crit
+  [ "$status" -eq 1 ]
 }
 
 @test "--check --crit はリンク済みなら exit 0 する" {
