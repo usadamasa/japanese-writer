@@ -34,12 +34,27 @@
             env.GOWORK = "off";
             vendorHash = "sha256-1vVdVqhUAcATwsPHXcwm4M6+jBuazDbxwYPDTHLOT1Y=";
           };
+
+          # nixos-unstable の go_1_26 が 1.26.10 より古い間は、crypto/x509 の GO-2026-6809 (1.26.10 で修正) を
+          # 避けるため go のソースだけを差し替える。nixpkgs が追いつけば差し替えは自動で外れるので、
+          # その後の掃除でこのブロックを消して go_1_26 に戻す
+          devGo =
+            if pkgs.lib.versionOlder pkgs.go_1_26.version "1.26.10" then
+              pkgs.go_1_26.overrideAttrs (old: rec {
+                version = "1.26.10";
+                src = pkgs.fetchurl {
+                  url = "https://go.dev/dl/go${version}.src.tar.gz";
+                  hash = "sha256-/WPog7ovK/ypPBZGsx6+9j4rHk0rMXyXidl2po2B828=";
+                };
+              })
+            else
+              pkgs.go_1_26;
         in
         {
           default = pkgs.mkShellNoCC {
             packages = with pkgs; [
               # go.mod の go ディレクティブと同じ版。ずれたら GOTOOLCHAIN=local で即座に失敗させる
-              go_1_26
+              devGo
               go-task
               golangci-lint
               shellcheck
