@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
+version: 2
+updates:
+  # 3 つとも group は作らず、パッケージごとに PR を出させる。group の PR が開いた
+  # ままだと同じ group の更新が全部止まり、1 つの更新の不具合で他の更新まで
+  # 巻き添えになる。
+  #
+  # go.mod / go.sum を上げても flake.nix の vendorHash はずれない。flake.nix で
+  # buildGoModule しているのは外部ツールの jv だけで、このリポジトリの module は
+  # nix でビルドしていない。
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Dependabot は `uses:` のタグと actions.lock の SHA を同じ commit で上げるので、
+  # CI の actions-lock ジョブ (`gh actions-lock --verify`) を通る。
+  #
+  # directory: / は .github/workflows/ しか見ず、composite action
+  # (.github/actions/*) の uses: を上げないので directories で足す。composite
+  # action 側の bump で actions.lock も上がるかは未確認 (2026-10)。actions-lock
+  # ジョブで落ちたら、その PR のブランチで `gh actions-lock` を実行する。
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/*
+    schedule:
+      interval: weekly
+
+  # devShell の Go と lint ツールの版は flake.lock の nixpkgs の rev で決まる。
+  # nix の対象は flake.lock の input の更新だけで、security updates は出ない。
+  # flake.nix の中で fetchFromGitHub している jv の version / hash / vendorHash は対象外。
+  - package-ecosystem: nix
+    directory: /
+    schedule:
+      interval: weekly
