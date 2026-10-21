@@ -18,7 +18,7 @@ jobs:
     name: Go test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/setup-nix
 
@@ -41,7 +41,7 @@ jobs:
     name: golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/setup-nix
 
@@ -55,7 +55,7 @@ jobs:
     env:
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/setup-nix
 
@@ -72,7 +72,7 @@ jobs:
     name: JSON schema
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/setup-nix
 
@@ -83,7 +83,7 @@ jobs:
     name: bats test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/setup-nix
 
@@ -94,7 +94,7 @@ jobs:
     name: shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       # apt の shellcheck ではなく devShell で固定した版を使い､ローカルの task lint と結果を揃える
       - uses: $/.github/actions/setup-nix
@@ -106,7 +106,7 @@ jobs:
     name: actions-lock verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - name: Install gh-actions-lock
         env:
