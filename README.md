@@ -117,7 +117,7 @@ plugin を使うだけなら「前提」節のツールで足りる。このリ�
 
 `go.mod` の `go` ディレクティブは devShell の `go_1_26` と揃え、`GOTOOLCHAIN=local` でずれたら失敗させる。
 ツールの版を上げるときは `nix flake update` で `flake.lock` を更新する。
-Go だけは `flake.nix` の `devGo` で版を差し替えていることがあり、そのときは `nix flake update` では変わらない。
+Go は nixpkgs の版が修正版に届かない間、`flake.nix` の `devGo` がソースを差し替える。
 
 CI と同じ確認は task で手元でも通せる。
 
