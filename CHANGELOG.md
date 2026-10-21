@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026.1021.0](https://github.com/usadamasa/japanese-writer/compare/2026.1018.1...2026.1021.0) - 2026-10-21
+
+- devShell の Go を 1.26.10 に上げる (GO-2026-6809) by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/73
+- Dependabot の設定を足す (gomod・github-actions・nix) by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/74
+
 ## [2026.1018.1](https://github.com/usadamasa/japanese-writer/compare/2026.1018.0...2026.1018.1) - 2026-10-18
 
 - fix(setup): 今の版と同じ内容を指す crit のリンクをリンク済みとする by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/71
