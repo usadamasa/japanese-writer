@@ -1,5 +1,15 @@
 # Changelog
 
+## [2026.1022.0](https://github.com/usadamasa/japanese-writer/compare/2026.1021.0...2026.1022.0) - 2026-10-22
+
+- chore(deps): Bump actions/create-github-app-token from 3.2.0 to 3.3.0 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/79
+- chore(deps): Bump actions/checkout from 6.0.3 to 7.0.1 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/76
+- chore(deps): Bump actions/upload-artifact from 7.0.1 to 7.0.2 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/77
+- chore(deps): Bump Songmu/tagpr from 1.20.3 to 1.21.3 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/78
+- go.mod に toolchain go1.26.10 を足し、hook のビルドを修正版の Go にする (GO-2026-6809) by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/81
+- writing-gate: 作業の進行状況の注記を拾う in-progress-note を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/82
+- setup-nix を gh-manage の共有 action へ移行する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/84
+
 ## [2026.1021.0](https://github.com/usadamasa/japanese-writer/compare/2026.1018.1...2026.1021.0) - 2026-10-21
 
 - devShell の Go を 1.26.10 に上げる (GO-2026-6809) by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/73
