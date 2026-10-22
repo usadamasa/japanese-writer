@@ -47,7 +47,8 @@ writing-gate は文書全体の集計 (語尾の連続・文体の混在) と逐
 
 - Node.js (`npx`)。textlint は `npx` で都度取得するので、`node_modules` を用意する必要はない
 - `jq`
-- Go (writing-gate のビルドに使う)
+- Go (writing-gate のビルドに使う)。PATH の `go` が `go.mod` の `toolchain` 行 (go1.26.10) より古いと、
+  `GOTOOLCHAIN` が既定の `auto` なら go がその版を取得してビルドするので、初回はネットワークが要る
 
 ## インストール
 
@@ -116,6 +117,8 @@ plugin を使うだけなら「前提」節のツールで足りる。このリ�
 - Claude Code CLI (`task validate` が `claude plugin validate` を呼ぶ)
 
 `go.mod` の `go` ディレクティブは devShell の `go_1_26` と揃え、`GOTOOLCHAIN=local` でずれたら失敗させる。
+`toolchain` 行は利用者の手元で SessionStart hook がビルドするときの下限で、
+`GOTOOLCHAIN=local` の devShell と CI では効かない。
 ツールの版を上げるときは `nix flake update` で `flake.lock` を更新する。
 Go は nixpkgs の版が修正版に届かない間、`flake.nix` の `devGo` がソースを差し替える。
 
