@@ -6,8 +6,7 @@ workflows:
     '.github/workflows/ci.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.2'
-        - 'determinatesystems/nix-installer-action@v23'
-        - 'nicknovitski/nix-develop@v1.2.1'
+        - 'usadamasa/gh-manage@main'
     '.github/workflows/tagpr.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -43,3 +42,11 @@ dependencies:
         commit: 'sha1-1fcd7292d1fe8ea9a8313eef46b8d80b7a15d227'
         owner_id: 177122
         repo_id: 524603982
+    'usadamasa/gh-manage@main':
+        ref: 'main'
+        commit: 'sha1-cc5165205b2ba23355f1058b01b4648c00525746'
+        owner_id: 513226
+        repo_id: 1390013800
+        uses:
+            - 'determinatesystems/nix-installer-action@v23'
+            - 'nicknovitski/nix-develop@v1.2.1'
