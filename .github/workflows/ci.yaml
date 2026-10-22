@@ -12,7 +12,7 @@ concurrency:
 permissions:
   contents: read
 
-# Go と lint・テストのツールは flake.nix の devShell から取る (setup-nix)。版の正本は flake.lock
+# Go と lint・テストのツールは flake.nix の devShell から取る (usadamasa/gh-manage の setup-nix)。版の正本は flake.lock
 jobs:
   go-test:
     name: Go test
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       - name: go build
         run: go build ./...
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       # shellcheck は shellcheck job が担うので､ここは Go の lint だけを走らせる
       - name: Run golangci-lint
@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       # 版を固定せず最新を入れる｡この job の目的は「今の Claude Code ランタイムが plugin を受理するか」を
       # 確かめること｡利用者側の Claude Code は自動更新されるので､固定版で通っても利用者の環境で
@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       - name: Validate JSON / YAML against declared schemas
         run: task validate:schema
@@ -85,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       - name: Run bats tests
         run: bats tests/
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       # apt の shellcheck ではなく devShell で固定した版を使い､ローカルの task lint と結果を揃える
-      - uses: $/.github/actions/setup-nix
+      - uses: usadamasa/gh-manage/actions/setup-nix@main
 
       - name: Run shellcheck
         run: task lint:shell

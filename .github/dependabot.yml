@@ -15,15 +15,8 @@ updates:
 
   # Dependabot は `uses:` のタグと actions.lock の SHA を同じ commit で上げるので、
   # CI の actions-lock ジョブ (`gh actions-lock --verify`) を通る。
-  #
-  # directory: / は .github/workflows/ しか見ず、composite action
-  # (.github/actions/*) の uses: を上げないので directories で足す。composite
-  # action 側の bump で actions.lock も上がるかは未確認 (2026-10)。actions-lock
-  # ジョブで落ちたら、その PR のブランチで `gh actions-lock` を実行する。
   - package-ecosystem: github-actions
-    directories:
-      - /
-      - /.github/actions/*
+    directory: /
     schedule:
       interval: weekly
 
