@@ -69,6 +69,18 @@ func TestCheckPhrases(t *testing.T) {
 			want:   true,
 		},
 		{
+			name:   "作業の進行状況の注記を拾う",
+			src:    "設定ファイルを置く (張る側を Makefile から deploy.sh へ移行中)｡\n",
+			wantID: "in-progress-note",
+			want:   true,
+		},
+		{
+			name:   "移行の手順の中の移行中は拾わない",
+			src:    "移行中にエラーが出たら、ログを確認する｡\n",
+			wantID: "in-progress-note",
+			want:   false,
+		},
+		{
 			name:   "コードブロック内は対象外",
 			src:    "説明の文｡\n\n```\nご指示のとおり\n```\n",
 			wantID: "process-leak",
