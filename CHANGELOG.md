@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1030.3](https://github.com/usadamasa/japanese-writer/compare/2026.1030.2...2026.1030.3) - 2026-10-30
+
+- 名前の列挙と本数を拾うルールを足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/96
+
 ## [2026.1030.2](https://github.com/usadamasa/japanese-writer/compare/2026.1030.1...2026.1030.2) - 2026-10-30
 
 - ai-words-ja の辞書から選んだ語彙を prh-prose へ取り込む by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/94
