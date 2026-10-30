@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1030.1](https://github.com/usadamasa/japanese-writer/compare/2026.1030.0...2026.1030.1) - 2026-10-30
+
+- prh-prose に検査を主語にした「効く」と「効き目」を登録する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/92
+
 ## [2026.1030.0](https://github.com/usadamasa/japanese-writer/compare/2026.1026.0...2026.1030.0) - 2026-10-30
 
 - chore(deps): Bump Songmu/tagpr from 1.21.3 to 1.21.4 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/88
