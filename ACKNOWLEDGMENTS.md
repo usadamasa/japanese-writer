@@ -14,6 +14,7 @@
 | @Kashiko_AIart の投稿 <https://x.com/Kashiko_AIart/status/2091137586991645101> | X の投稿 | [sanitize-artifacts](skills/sanitize-artifacts/SKILL.md) の「却下した案の扱い (ピンクの象)」節、[writing-gate](writing-gate/README.md) の却下案の痕跡の検出 | 翻案 | - |
 | @yugen_matuni の投稿 <https://x.com/yugen_matuni/status/2088251220452679951> | X の投稿 | [writing-feedback](skills/writing-feedback/SKILL.md)、[writing-gate](writing-gate/README.md) と Stop hook (執筆後の機械点検の層) | 翻案 | - |
 | nanaism の skill (yomiyasu) <https://github.com/nanaism/yomiyasu> | skill | [textlint-check](skills/textlint-check/SKILL.md) の prh ルール (比喩動詞・前置きのフィラー・定型の結びの検出)、writing-gate の [`bold-not-rendered`](writing-gate/docs/rules/bold-not-rendered.md) (太字として表示されない `**` の検出)、[japanese-tech-writing](skills/japanese-tech-writing/SKILL.md) の Phase 1.1 (文書の立場と文末)、[proofread](skills/proofread/SKILL.md) の Tier 2 の意味の保持と情報の不増補 | 一部採用、writing-gate は移植、文書の立場と意味の保持は翻案 | MIT |
+| p1ass の textlint preset (textlint-rule-preset-ai-words-ja) <https://github.com/p1ass/textlint-rule-preset-ai-words-ja> | textlint preset | [textlint-check](skills/textlint-check/SKILL.md) の prh ルール (比喩として出る語彙の検出) | 一部採用 (辞書を候補リストとして使い、正規表現で翻案) | MIT |
 
 ## 書籍・公的資料
 

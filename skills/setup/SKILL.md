@@ -9,7 +9,7 @@ description: >-
 
 # setup
 
-plugin の準備を手で確かめ直す。実体は `scripts/setup.sh` で、本 skill はそれを走らせて結果を利用者へ返す。
+plugin の準備を手で確かめ直す。実体は `scripts/setup.sh` で、本 skill はそれを実行して結果を利用者へ返す。
 
 writing-gate のビルドは、普段は SessionStart hook が plugin の data ディレクトリ
 (`${CLAUDE_PLUGIN_DATA}`) へ自動で行う。install と update の後に本 skill を呼ぶ必要はない。
