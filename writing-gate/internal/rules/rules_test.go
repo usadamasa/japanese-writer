@@ -82,6 +82,11 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"括弧内に読点で 4 つ以上並べた列挙を拾う", "inline-enumeration", "install 後の前提確認 (herdr か rex､go/jq､statusline の state file､バイナリ､peer messaging)｡", true},
 		{"全角読点の列挙も拾う", "inline-enumeration", "前提を確かめる (git、jq、go、task)。", true},
 		{"括弧内の 3 項目は拾わない", "inline-enumeration", "対象は 3 種類 (wiki、ADR、blog) ある｡", false},
+		{"識別子を中黒で 3 つ以上並べた列挙を拾う", "member-name-list", "前提: go・go-arch-lint・golangci-lint・gosec が PATH にある｡", true},
+		{"先頭が inline code の中黒の列挙を拾う", "member-name-list", "・vulncheck・arch-baseline は含めない｡", true},
+		{"inline code を中黒で並べた除去跡を拾う", "member-name-list", "・・・ の 4 本は flake が配る｡", true},
+		{"識別子 2 つの中黒は拾わない", "member-name-list", "go・jq が要る｡", false},
+		{"和語の中黒は拾わない", "member-name-list", "読み・書き・計算を扱う｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
