@@ -182,7 +182,7 @@ description: >-
 
 「メタ指示を削除しました」「サニタイズ版です」のような前置きを付けない。変更点の要約も併せて求められたときは、成果物を先、要約を後に置く。
 
-[[proofread]] の一部として走るときはこの限りでない。proofreader subagent の仕事は Tier 分類した検出結果を return することで、成果物そのものを出力しない。
+[[proofread]] の proofreader subagent が本スキルの点検を実行するときはこの限りでない。proofreader subagent の仕事は Tier 分類した検出結果を return することで、成果物そのものを出力しない。
 
 ## 適用しない文書の種類
 

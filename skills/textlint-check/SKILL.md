@@ -88,7 +88,7 @@ prh の `rulePaths` は `.textlintrc.json` の置き場所からの相対パス�
 ### autofix と検出で config を分ける
 
 lint config の隣に `fix.textlintrc.json` があれば、`textlint-run.sh` は autofix pass だけを
-そちらで走らせる。同梱の config はこの形になっており、autofix が触るのは表記ゆれだけになる。
+その config で実行する。同梱の config はこの形になっており、autofix が触るのは表記ゆれだけになる。
 
 語だけを置き換えると、同じ問題が形を変えて残る。英文略号を和訳語に差し替えても読点と
 語順は英語のままで、「あなた」を「読者」に替えても主語の立て方は変わらない。そのため意味に
@@ -210,12 +210,11 @@ autofix が先に全角へ揃えるため、lint pass は文ごとに数える�
   拾う絞り方は原典に従う。パターンは全角・半角どちらの句読点も受ける形と、である体に合わせて書き直し、指摘の文面は検出語の置換ではなく
   文ごとの書き直しを求める形にした。原典の語彙リスト・減点スコア・太字と箇条書きの比率は採っていない。
   - Copyright (c) 2026 nanaism。MIT License <https://github.com/nanaism/yomiyasu/blob/main/LICENSE>
-- `configs/prh-prose.yml` の語彙ルールのうち、`壊れる` `崩す` `破綻` `黙って` `値を動かす` `から引く` `原初`
-  `無差別` `正典` `配線する` `太る` `見張る` `原料` `素通り` `構図` `定番` `定石` を拾うものは、p1ass の
+- `configs/prh-prose.yml` の語彙ルールの一部は、p1ass の
   textlint-rule-preset-ai-words-ja <https://github.com/p1ass/textlint-rule-preset-ai-words-ja> の
   内蔵辞書 (v1.2.1) を候補リストとして選んだ。比喩の用法だけを拾うために語の前後を絞る方針は原典に従う。
   形態素解析による照合と「別の表現に言い換えられないか検討してください」という指摘の文面は採らず、
-  語ごとに正規表現で比喩の形を絞り、書き換えの方向を示す文面にした。技術用語として普通に使う語
-  (検査、経路、実測、照合、切り分ける など) は採っていない。解説記事は
+  語ごとに正規表現で比喩の形を絞り、書き換えの方向を示す文面にした。技術用語として普通に使う語は
+  採っていない。解説記事は
   <https://blog.p1ass.com/posts/textlint-rule-preset-ai-words-ja/> にある。
   - MIT License <https://github.com/p1ass/textlint-rule-preset-ai-words-ja/blob/main/LICENSE>

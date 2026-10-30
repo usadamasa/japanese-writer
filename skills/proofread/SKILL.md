@@ -65,8 +65,8 @@ md ドラフトの総合添削スキル。 proofreader subagent で別コンテ�
   絶対パス、または `skill` のデプロイ先ディレクトリ (`~/.claude/skills/<skill>/`) からの
   相対パスで指定する。
 
-未指定なら、ドメインチェックの step を skip し `skipped` に記録する。汎用の機械点検・
-文章規範チェックはそのまま走る。
+未指定なら、ドメインチェックの step を skip し `skipped` に記録する。汎用の機械点検と
+文章規範チェックは、指定したときと同じく subagent が実行する。
 
 ### style_check
 

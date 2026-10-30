@@ -32,4 +32,4 @@ subagent へ引き渡す。
 textlint-check は medium の語彙を持たず、どの `.textlintrc.json` を効かせるかは `config_root` だけで決まる。
 `config_root` 未指定のときは textlint-check 同梱の `configs/base.textlintrc.json` が使われる。
 
-上の表の textlint-check 列は、親が Step 0 で機械点検を走らせるかどうかを示す。どの medium でも走らせる。
+上の表の textlint-check 列は、親が Step 0 で機械点検を実行するかどうかを示す。どの medium でも実行する。
