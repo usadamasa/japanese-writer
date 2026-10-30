@@ -1,5 +1,10 @@
 # Changelog
 
+## [2026.1030.0](https://github.com/usadamasa/japanese-writer/compare/2026.1026.0...2026.1030.0) - 2026-10-30
+
+- chore(deps): Bump Songmu/tagpr from 1.21.3 to 1.21.4 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/88
+- chore(deps): Bump nixpkgs from `02c087f` to `3ec6363` by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/89
+
 ## [2026.1026.0](https://github.com/usadamasa/japanese-writer/compare/2026.1021.0...2026.1026.0) - 2026-10-26
 
 - chore(deps): Bump actions/create-github-app-token from 3.2.0 to 3.3.0 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/79
