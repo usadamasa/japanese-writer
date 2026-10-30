@@ -10,7 +10,7 @@ workflows:
     '.github/workflows/tagpr.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
-        - 'songmu/tagpr@v1.21.3'
+        - 'songmu/tagpr@v1.21.4'
 dependencies:
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
@@ -37,9 +37,9 @@ dependencies:
         commit: 'sha1-9be7cfb4b10451d3390a75dc18ad0465bed4932a'
         owner_id: 151337
         repo_id: 706956179
-    'songmu/tagpr@v1.21.3':
-        ref: 'v1.21.3'
-        commit: 'sha1-1fcd7292d1fe8ea9a8313eef46b8d80b7a15d227'
+    'songmu/tagpr@v1.21.4':
+        ref: 'v1.21.4'
+        commit: 'sha1-e1250d6c84e4425db82b5e90549d62dfe23e9ebe'
         owner_id: 177122
         repo_id: 524603982
     'usadamasa/gh-manage@main':
