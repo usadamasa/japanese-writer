@@ -87,6 +87,7 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"inline code を中黒で並べた除去跡を拾う", "member-name-list", "・・・ の 4 本は flake が配る｡", true},
 		{"識別子 2 つの中黒は拾わない", "member-name-list", "go・jq が要る｡", false},
 		{"和語の中黒は拾わない", "member-name-list", "読み・書き・計算を扱う｡", false},
+		{"和語から始まる中黒の並びは拾わない", "member-name-list", "wiki ページ・ADR・Design Doc を扱う｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
