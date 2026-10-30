@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1030.2](https://github.com/usadamasa/japanese-writer/compare/2026.1030.1...2026.1030.2) - 2026-10-30
+
+- ai-words-ja の辞書から選んだ語彙を prh-prose へ取り込む by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/94
+
 ## [2026.1030.1](https://github.com/usadamasa/japanese-writer/compare/2026.1030.0...2026.1030.1) - 2026-10-30
 
 - prh-prose に検査を主語にした「効く」と「効き目」を登録する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/92
