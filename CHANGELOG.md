@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1030.4](https://github.com/usadamasa/japanese-writer/compare/2026.1030.3...2026.1030.4) - 2026-10-30
+
+- 内部用語と主語の無い動詞を拾うルールを足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/98
+
 ## [2026.1030.3](https://github.com/usadamasa/japanese-writer/compare/2026.1030.2...2026.1030.3) - 2026-10-30
 
 - 名前の列挙と本数を拾うルールを足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/96
