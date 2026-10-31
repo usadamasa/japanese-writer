@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.1031.0](https://github.com/usadamasa/japanese-writer/compare/2026.1030.4...2026.1031.0) - 2026-10-31
+
+- member-name-list で「と」でつないだ識別子の列挙を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/100
+
 ## [2026.1030.4](https://github.com/usadamasa/japanese-writer/compare/2026.1030.3...2026.1030.4) - 2026-10-30
 
 - 内部用語と主語の無い動詞を拾うルールを足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/98
