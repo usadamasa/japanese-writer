@@ -88,6 +88,9 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"識別子 2 つの中黒は拾わない", "member-name-list", "go・jq が要る｡", false},
 		{"和語の中黒は拾わない", "member-name-list", "読み・書き・計算を扱う｡", false},
 		{"和語から始まる中黒の並びは拾わない", "member-name-list", "wiki ページ・ADR・Design Doc を扱う｡", false},
+		{"パスを「と」で 3 つ以上つないだ列挙を拾う", "member-name-list", "~/go と ~/.npm と ~/.codex を作らないよう渡す｡", true},
+		{"識別子 2 つを「と」でつないだ並びは拾わない", "member-name-list", "go と jq が要る｡", false},
+		{"和語を「と」でつないだ並びは拾わない", "member-name-list", "読みと書きと計算を扱う｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
