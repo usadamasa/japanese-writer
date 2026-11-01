@@ -7,7 +7,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - edited
   merge_group:
 
 concurrency:
