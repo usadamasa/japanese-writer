@@ -37,6 +37,11 @@ dependencies:
         commit: 'sha1-9be7cfb4b10451d3390a75dc18ad0465bed4932a'
         owner_id: 151337
         repo_id: 706956179
+    'nix-community/cache-nix-action@v7.0.2':
+        ref: 'v7.0.2'
+        commit: 'sha1-7df957e333c1e5da7721f60227dbba6d06080569'
+        owner_id: 33221035
+        repo_id: 660071037
     'songmu/tagpr@v1.21.4':
         ref: 'v1.21.4'
         commit: 'sha1-e1250d6c84e4425db82b5e90549d62dfe23e9ebe'
@@ -44,9 +49,10 @@ dependencies:
         repo_id: 524603982
     'usadamasa/gh-manage@main':
         ref: 'main'
-        commit: 'sha1-cc5165205b2ba23355f1058b01b4648c00525746'
+        commit: 'sha1-e14bcdd4429a5a58d3957e8fdee8499a179c8fec'
         owner_id: 513226
         repo_id: 1390013800
         uses:
             - 'determinatesystems/nix-installer-action@v23'
             - 'nicknovitski/nix-develop@v1.2.1'
+            - 'nix-community/cache-nix-action@v7.0.2'
