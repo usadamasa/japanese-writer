@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1103.0](https://github.com/usadamasa/japanese-writer/compare/2026.1031.0...2026.1103.0) - 2026-11-03
+
+- ci: pull_request の types から edited を外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/102
+- ci: actions-lock の検証を gh-manage の共有 composite へ置き換える by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/104
+- prh-prose: 「〜で受ける」と「〜で初めて分かる」を検出する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/105
+
 ## [2026.1031.0](https://github.com/usadamasa/japanese-writer/compare/2026.1030.4...2026.1031.0) - 2026-10-31
 
 - member-name-list で「と」でつないだ識別子の列挙を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/100
