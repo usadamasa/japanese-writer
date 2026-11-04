@@ -191,6 +191,10 @@ link_crit_to_clone() {
 }
 
 @test "crit が無ければ --crit を案内しない" {
+  echo "DEBUG PATH=$PATH" >&3
+  echo "DEBUG command -v crit -> $(command -v crit 2>&1 || echo NONE)" >&3
+  echo "DEBUG ls /usr/bin | grep -i crit -> $(ls /usr/bin 2>&1 | grep -i crit || echo NONE)" >&3
+  echo "DEBUG ls /bin | grep -i crit -> $(ls /bin 2>&1 | grep -i crit || echo NONE)" >&3
   run "$SCRIPT_PATH"
   [ "$status" -eq 0 ]
   [[ "$output" != *"--crit"* ]]
