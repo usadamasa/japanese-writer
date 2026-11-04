@@ -91,6 +91,11 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"パスを「と」で 3 つ以上つないだ列挙を拾う", "member-name-list", "~/go と ~/.npm と ~/.codex を作らないよう渡す｡", true},
 		{"識別子 2 つを「と」でつないだ並びは拾わない", "member-name-list", "go と jq が要る｡", false},
 		{"和語を「と」でつないだ並びは拾わない", "member-name-list", "読みと書きと計算を扱う｡", false},
+		{"未議論であることの注記を拾う", "in-progress-note", "この位置づけは責任者とは議論していない｡", true},
+		{"現時点ではの否定述語を拾う", "in-progress-note", "対象リポジトリには自動更新ツールを現時点では導入していない｡", true},
+		{"日付時点でのの否定述語を拾う", "in-progress-note", "2026-11-04 時点で対象リポジトリには自動更新ツールを導入しておらず、更新は手動の Pull Request で行う｡", true},
+		{"している途中での注記を拾う", "in-progress-note", "更新 Pull Request を自動で出す仕組みは整備している途中で、手動運用が続いている｡", true},
+		{"現時点ではだけで否定述語が無ければ拾わない", "in-progress-note", "現時点ではこの設計が正しい｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

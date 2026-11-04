@@ -17,10 +17,11 @@ setup() {
 }
 
 teardown() {
-  teardown_plugin_tree
+  # CLONE は mockbin の rm を使うので、mockbin ごと消す teardown_plugin_tree より先に消す
   if [ -n "${CLONE:-}" ]; then
     rm -rf "$CLONE"
   fi
+  teardown_plugin_tree
 }
 
 # link_crit_to_clone -> 利用者の clone を模した場所の crit/on_finish_approved.md へ crit の prompt を張り、
