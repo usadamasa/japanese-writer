@@ -33,12 +33,18 @@ setup_plugin_tree() {
 
   MOCK_PATH="$WORKDIR/mockbin"
   mkdir -p "$MOCK_PATH"
-  # jq は本物を使う (結果 JSON の読み取りに要る)。ディレクトリごと PATH に足すと
-  # 同居する npx や crit まで見えてしまうので、jq だけを持ち込む。shim 経由の jq は
-  # 元の PATH が無いと本体を探せないため、symlink ではなく元の PATH で起動する wrapper にする
-  printf '#!/bin/bash\nPATH=%q exec jq "$@"\n' "$PATH" >"$MOCK_PATH/jq"
-  chmod +x "$MOCK_PATH/jq"
-  PATH="$MOCK_PATH:/usr/bin:/bin"
+  # go / npx / crit は検出対象のコマンドなので、ホストに同名の実在コマンドがあっても
+  # 見えてはいけない (crit は CRIU の image tool として /usr/bin に入っていることがある)。
+  # ディレクトリごと PATH に足すと同居するそれらまで見えてしまうので、スクリプトが使う
+  # 実コマンドだけを個別に持ち込む。shim 経由のコマンドは元の PATH が無いと本体を探せない
+  # ことがあるため、symlink ではなく元の PATH で起動する wrapper にする
+  local cmd
+  for cmd in jq mkdir touch rm ln readlink cmp dirname basename find sort xargs cksum cat cp mv mktemp chmod wc tr grep; do
+    command -v "$cmd" >/dev/null || continue
+    printf '#!/bin/bash\nPATH=%q exec %q "$@"\n' "$PATH" "$cmd" >"$MOCK_PATH/$cmd"
+    chmod +x "$MOCK_PATH/$cmd"
+  done
+  PATH="$MOCK_PATH"
   export PATH
 }
 
