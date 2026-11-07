@@ -35,8 +35,8 @@ description: >-
 
 構造・文脈の指摘は、ここでは規範にしない。[[writing-retrospective]] がまとめて読み、繰り返し現れたものを
 規範へ入れる。レビュー 1 回分を 1 ファイルにして、Write で
-`~/.claude/japanese-writer/retrospective/inbox/<YYYYMMDD-HHMMSS>-<文書名の slug>.md` に新規作成する。
-既存のファイルには追記しない。
+`$XDG_STATE_HOME/japanese-writer/retrospective/inbox/<YYYYMMDD-HHMMSS>-<文書名の slug>.md` に新規作成する
+(`XDG_STATE_HOME` が未設定なら `~/.local/state`)。既存のファイルには追記しない。
 
 ```markdown
 ---

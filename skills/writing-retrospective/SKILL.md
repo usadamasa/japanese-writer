@@ -22,14 +22,27 @@ description: >-
 - 前回の `last_run` から 30 日が近い。セッションログは Claude Code の既定 (`cleanupPeriodDays`) で 30 日ほどで消え、
   inbox に書かれていない指摘はそこで失われる
 
+## 状態の置き場
+
+inbox・持ち越しの候補・前回の実行時刻は、端末ローカルの `$XDG_STATE_HOME/japanese-writer/retrospective/`
+に置く (以下 `<state>`)。`XDG_STATE_HOME` が未設定なら `~/.local/state` を使う。中身は他の文書の指摘を
+原文で持つので、リポジトリには入れない。
+
+| パス | 中身 |
+|----|----|
+| `<state>/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘 |
+| `<state>/carryover.jsonl` | 前回までに 1 回きりだった候補の一般形 |
+| `<state>/state.json` | 前回の棚卸しの開始時刻 (`last_run`) |
+
+書き込みは Write ツールで行う。Bash の sandbox はこの置き場への書き込みを許していないことがある。
+
 ## 入力
 
-次の表の入力を、前回の `last_run` 以降に絞って読む。`last_run` は
-`~/.claude/japanese-writer/retrospective/state.json` にある。ファイルが無ければ初回として全期間を読む。
+次の表の入力を、前回の `last_run` 以降に絞って読む。`<state>/state.json` が無ければ初回として全期間を読む。
 
 | 入力 | 場所 | 読み方 |
 |----|----|----|
-| inbox | `~/.claude/japanese-writer/retrospective/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘。1 ファイル 1 レビュー分。形式は [[writing-feedback]] が決める |
+| inbox | `<state>/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘。1 ファイル 1 レビュー分。形式は [[writing-feedback]] が決める |
 | crit のコメント | セッションログ (`~/.claude/projects/*/*.jsonl`) と crit の記録 (`~/.crit` 配下の `review.json`) | 同梱のフィルタで機械的に取り出す (Step 1)。crit の記録は approve 後に消えるものが多く、コメントの大半はセッションログに残った approve 後 prompt から取れる |
 | 会話での訂正 | セッションログ | crit を通さずに文章を直させた発言。dream harvest を索引にして、文章を扱ったセッションだけを開く (Step 1) |
 | PR | ルールを持つリポジトリ (本 plugin) の merged PR | writing-feedback の PR 本文の「残した課題」に、登録を見送った構成の指摘が要約で残る |
@@ -100,8 +113,12 @@ Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせ�
 ### Step 3: 繰り返しを見る
 
 一般形が同じ指摘をまとめる。**別々の文書で 2 回以上** 現れたものだけを規範の候補にする。
+初回や間が長く空いた後で候補が多すぎるときは、閾値を 3 文書に上げてよい。上げたら PR 本文にそう書く。
 
-数えるときは、前回から持ち越した候補 (`~/.claude/japanese-writer/retrospective/carryover.jsonl`) も足す。
+理由の無い一言の指摘 (「不要」「書きすぎ」) を寄せた束は、粗いまま規範にしない。束に入った指摘の返信を読み、
+書き手が実際にどう直したか (消した、縮めた、別の文書へ移した) で分けてから規範の文を決める。
+
+数えるときは、前回から持ち越した候補 (`<state>/carryover.jsonl`) も足す。
 1 回きりのものは同じファイルへ持ち越す。セッションログは消えるので、元の指摘ではなく一般形と文書を残す。
 ファイルは Write で丸ごと書き直し、規範へ入れたものは外す。
 
@@ -140,7 +157,7 @@ Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせ�
 
 1. 規範 1 つにつき 1 commit にする。commit message に一般形と、何件の別文書から来たかを書く。
 2. Draft PR を作る。本文の「残した課題」に、持ち越した候補の一般形と、plugin の外へ渡した指摘を書く。
-3. `state.json` の `last_run` を、Step 1 を始めた時刻 (ISO 8601) で書き直す。
+3. `<state>/state.json` の `last_run` を、Step 1 を始めた時刻 (ISO 8601) で書き直す。
 
 ```json
 {"last_run": "2026-11-07T15:00:00+09:00"}
