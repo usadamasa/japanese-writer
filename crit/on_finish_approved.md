@@ -12,8 +12,8 @@
 - 今の cwd と同じリポジトリなら、この節の作業を subagent に任せる。`Agent` ツールで 1 本だけ
   起動し、結果を待たずに次節へ進む。
 - 今の cwd と違うリポジトリなら、そのリポジトリを cwd にした別セッションへこの節の作業を
-  引き継ぐ ([[cross-session-messaging]] または [[herdr-operations]] の手順に従う)。送信後は
-  結果を待たずに次節へ進む。worktree での代用と `git -C` / `cd` での代用はしない。
+  引き継ぐ (`agents-daemon:peer-sessions` skill の手順に従う)。送信後は結果を待たずに
+  次節へ進む。worktree での代用と `git -C` / `cd` での代用はしない。
 
 いずれの場合も、渡す指示には次を含める。
 
