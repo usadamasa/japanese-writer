@@ -64,7 +64,7 @@ rg --files --hidden -0 -g 'review.json' ~/.crit \
   | xargs -0 jq -c -f "${CLAUDE_SKILL_DIR}/extract-crit-comments.jq" >> ./tmp/retrospective/crit-all.jsonl
 jq -s -c --arg since "<last_run>" '
   group_by(.id) | map(last) | .[]
-  | select((.created_at // "") > $since)
+  | select($since == "" or (.created_at // "") > $since)
   | select((.author // "") | test("Claude") | not)
   | select(.path == null or (.path | test("\\.md$")))
   | {id, doc: (.path // "review"), body, target: ((.quote // .anchor // "")[0:200]),
