@@ -20,7 +20,10 @@
 │         ├─ style_check で差し込んだ文体 skill (任意)
 │         └─ domain_check で差し込んだ用語 skill (任意)
 ├─ /japanese-writer:writing-feedback ── 言い回しを直されたとき
-│    └─ crit の approve 後の prompt (crit/on_finish_approved.md) からも呼ばれる
+│    ├─ crit の approve 後の prompt (crit/on_finish_approved.md) からも呼ばれる
+│    └─ 構成・文脈の指摘は inbox へ書くだけにする
+├─ /japanese-writer:writing-retrospective ── 思い出したとき、dream を回すとき
+│    └─ inbox・crit の記録・PR・セッションログを棚卸しして japanese-tech-writing の規範へ入れる
 ├─ /japanese-writer:gate-off, gate-on ── このセッションの間だけ Stop hook の点検を止める・戻す
 ├─ (自動) SessionStart hook: writing-gate を data ディレクトリへビルド ── セッションを開くとき
 └─ (自動) Stop hook: writing-gate ── セッションを閉じるとき
@@ -33,7 +36,8 @@
 | skill | proofread | md ドラフトの総合添削。proofreader subagent へ委譲し、修正案が一意なものは適用して報告し、論証に関わるものは警告に留める | ユーザーが `/japanese-writer:proofread` で呼ぶ (添削の入口) |
 | skill | textlint-check | textlint による機械点検と自動修正。呼び出し元が `config_root` で config を切り替える | proofread の内側から呼ばれる。機械点検だけ欲しいときは単体でも呼べる |
 | skill | sanitize-artifacts | 対話で仕上げた成果物から、制作過程と却下した案の痕跡を取り除く | proofreader が点検の観点として読み込む。「これは消して」の後の作り直しでは単体で呼ぶ |
-| skill | writing-feedback | 言い回しへの指摘を prh のルールとして登録し、次から機械が拾えるようにする | ユーザーが言い回しを直したときに呼ぶ。crit の approve 後の prompt からも回る |
+| skill | writing-feedback | 言い回しへの指摘を prh のルールとして登録し、次から機械が拾えるようにする。構成・文脈の指摘は inbox へ書く | ユーザーが言い回しを直したときに呼ぶ。crit の approve 後の prompt からも回る |
+| skill | writing-retrospective | 正規表現で拾えない構成・文脈の指摘を棚卸しし、繰り返し現れたものを文章規範へ入れる | ユーザーが思い出したときに `/japanese-writer:writing-retrospective` で呼ぶ。dream と同じ周期が目安 |
 | skill | gate-off / gate-on | このセッションの間だけ Stop hook の文章点検を止める・戻す。ファイルや設定には触れない | ユーザーが `/japanese-writer:gate-off` と `/japanese-writer:gate-on` で打つ。Claude が Skill ツールで呼んでも効かない |
 | agent | proofreader | proofread skill から呼ばれる添削担当の subagent | proofread が dispatch する。直接は呼ばない |
 | hook | SessionStart: prepare | writing-gate のビルドの入力が前回と違えば data ディレクトリへビルドし直し、crit の prompt を data へ複製する | 自動 (開始時) |
