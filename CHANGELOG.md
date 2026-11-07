@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.1107.0](https://github.com/usadamasa/japanese-writer/compare/2026.1103.0...2026.1107.0) - 2026-11-07
+
+- writing-gate: in-progress-note に進行状況注記の別表層形を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/106
+- fix(crit): on_finish_approved.md の廃止済み skill 参照を直す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/110
+- writing-retrospective: 構成・文脈の指摘を棚卸しして規範へ入れる skill を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/111
+- 文章規範: crit レビューで繰り返し受けた構成・文脈の指摘を反映する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/112
+
 ## [2026.1103.0](https://github.com/usadamasa/japanese-writer/compare/2026.1031.0...2026.1103.0) - 2026-11-03
 
 - ci: pull_request の types から edited を外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/102
