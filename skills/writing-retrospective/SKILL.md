@@ -30,64 +30,84 @@ description: >-
 | 入力 | 場所 | 読み方 |
 |----|----|----|
 | inbox | `~/.claude/japanese-writer/retrospective/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘。1 ファイル 1 レビュー分。形式は [[writing-feedback]] が決める |
-| crit の記録 | `~/.crit/reviews/*/review.json`、`~/.crit/plans/*/.crit/review.json` | `jq '[.review_comments[]?, .files[]?.comments[]?] \| map({body, quote, replies: [.replies[]?.body]})'`。approve 後に消える記録もあるので、残っている分だけ読む |
-| PR | ルールを持つリポジトリ (本 plugin) の merged PR | writing-feedback の PR 本文の「残した課題」に、登録を見送った構成の指摘が要約で残る。`gh pr list --state merged --search "merged:>=<last_run の日付>" --json number,title,body` |
-| セッションログ | `~/.claude/projects/*/<session_id>.jsonl` | crit の approve 後 prompt を受けた tool_result と、文章を直させたユーザーの発言。読む手順は次の節 |
-
-`~/.crit` は `find` で辿らず `rg --files --hidden -g '*.json' ~/.crit` で列挙する。
-
-### セッションログの絞り込み
-
-全 transcript を読むと重いので、文章を扱ったセッションに絞る。
-
-agents-daemon の dream harvest (`~/.local/state/agents-daemon/dream/harvest/*.jsonl`) があるなら、索引として使う。
-harvest は 1 セッション 1 行で、`skills_invoked` に呼ばれた skill 名が入る。発言は 200 文字で切られているので、
-中身は harvest ではなく transcript から読む。
-
-```bash
-jq -r --arg since "<last_run>" \
-  'select(.ts_end > $since)
-   | select(.skills_invoked | any(test("crit|writing-feedback|proofread|japanese-tech-writing")))
-   | .session_id' \
-  ~/.local/state/agents-daemon/dream/harvest/*.jsonl | sort -u
-```
-
-harvest が無いなら、`rg -l -F '言い回しの指摘をルールへ移す' --glob '*.jsonl' ~/.claude/projects` で
-crit の approve 後 prompt を受けたセッションを拾う。
-
-transcript の 1 行は 1 メッセージで、crit のコメントは `type: "user"` の行の `tool_result` の文字列や、
-brief ファイルを Read した結果の中に JSON のまま入っている。形が一定しないので、`jq '.. | strings'` で
-文字列を全部出してから `"replies"` を含むものを拾う。
+| crit のコメント | セッションログ (`~/.claude/projects/*/*.jsonl`) と crit の記録 (`~/.crit` 配下の `review.json`) | 同梱のフィルタで機械的に取り出す (Step 1)。crit の記録は approve 後に消えるものが多く、コメントの大半はセッションログに残った approve 後 prompt から取れる |
+| 会話での訂正 | セッションログ | crit を通さずに文章を直させた発言。dream harvest を索引にして、文章を扱ったセッションだけを開く (Step 1) |
+| PR | ルールを持つリポジトリ (本 plugin) の merged PR | writing-feedback の PR 本文の「残した課題」に、登録を見送った構成の指摘が要約で残る |
 
 ## 手順
 
 ### Step 1: 採取する
 
-入力ごとに採取用の subagent を起動し、指摘を `./tmp/retrospective/raw-<入力>.md` へ書き出させる。
-1 指摘につき、指摘の本文・返信・指摘された文 (`quote` か `anchor`)・文書の種類 (ADR、wiki、README など)・
-出所 (ファイルパスか PR 番号) を残す。採取の段では判断させない。
+crit のコメントは判断なしで取り出せるので、subagent を使わずにフィルタを当てる。
+フィルタ (`${CLAUDE_SKILL_DIR}/extract-crit-comments.jq`) は transcript の 1 行か `review.json` を受ける。
+出力はコメント 1 件 1 行の JSON で、本文・返信・指摘された文・ファイルパス・作成時刻を持つ。
+同じコメントは approve のたびに繰り返し埋め込まれるので、`id` で重複を除く。
 
-transcript は数が多いので、subagent 1 つあたり 20 ファイル程度に分けて割り当てる。
+```bash
+mkdir -p ./tmp/retrospective
+rg -l -0 --glob '*.jsonl' -F '"replies' ~/.claude/projects \
+  | xargs -0 jq -c -f "${CLAUDE_SKILL_DIR}/extract-crit-comments.jq" > ./tmp/retrospective/crit-all.jsonl
+rg --files --hidden -0 -g 'review.json' ~/.crit \
+  | xargs -0 jq -c -f "${CLAUDE_SKILL_DIR}/extract-crit-comments.jq" >> ./tmp/retrospective/crit-all.jsonl
+jq -s -c --arg since "<last_run>" '
+  group_by(.id) | map(last) | .[]
+  | select((.created_at // "") > $since)
+  | select((.author // "") | test("Claude") | not)
+  | select(.path == null or (.path | test("\\.md$")))
+  | {id, doc: (.path // "review"), body, target: ((.quote // .anchor // "")[0:200]),
+     replies: [.replies[].body[0:300]]}' \
+  ./tmp/retrospective/crit-all.jsonl > ./tmp/retrospective/crit.jsonl
+```
+
+`~/.crit` は `find` で辿らず `rg --files` で列挙する。書き手 (Claude) のコメントと、md 以外へのコメント
+(コードやその設計への意見が大半) は落とす。
+
+会話での訂正は、agents-daemon の dream harvest (`~/.local/state/agents-daemon/dream/harvest/*.jsonl`) を
+索引にする。harvest は 1 セッション 1 行で、`skills_invoked` に呼ばれた skill 名、`feedback_signals` に
+ユーザーの訂正の抜粋が入る。抜粋は 200 文字で切られているので、文章への指摘らしいものがあれば
+`session_id` の transcript を開いて前後を読む。
+
+```bash
+jq -c --arg since "<last_run>" '
+  select(.ts_end > $since)
+  | select(.skills_invoked | any(test("proofread|japanese-tech-writing|writing-style|writing-feedback")))
+  | {session_id, signals: [.feedback_signals[]?.quote]} | select(.signals | length > 0)' \
+  ~/.local/state/agents-daemon/dream/harvest/*.jsonl > ./tmp/retrospective/conversation.jsonl
+```
+
+harvest が無い環境では、会話での訂正は inbox に書かれた分だけを読む。
+
+PR は `gh pr list --state merged --search "merged:>=<last_run の日付>" --json number,title,body` で取り、
+「残した課題」の節だけを読む。
 
 ### Step 2: 分ける
 
-`model: "sonnet"` の subagent に raw を全部渡し、指摘ごとに次の区分へ分けさせる。
+Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせる。crit のコメントは 200 件程度ずつに
+`split -l` で割り、割った数だけ subagent を並べて起動する。各 subagent は 1 件ずつ次の区分に分け、
+`./tmp/retrospective/classified-<n>.jsonl` へ書く。
 
 | 区分 | 判定 | 行き先 |
 |----|----|----|
+| 作業の指示 | 文章ではなく、作業や設計・コードへの意見 | 捨てる |
 | 言い回し | 語・句を差し替えれば直る | 既に prh / writing-gate にあるか確かめ、無ければ [[writing-feedback]] へ回す |
 | 構造・文脈 | 段落の順序、節の構成、論証の飛躍、読み手の前提、書く範囲、図や表の置き方のように、文を読み比べないと判断できない | Step 3 へ |
 | 文書固有 | その文書の事実・固有名・その場の決定に依存する | 捨てる |
 | 事実誤り | 内容が間違っている | 捨てる (規範ではなく知識の問題) |
 
-構造・文脈に分けた指摘には、文書名と固有名を外した 1 文の一般形 (「結論より先に経緯を書いている」) を付けさせる。
+構造・文脈に分けた指摘には、文書名と固有名を外した 1 文の一般形 (「結論より先に経緯を書いている」) と、
+直し方の 1 文を付けさせる。並べた subagent の間で一般形の言い回しがずれるので、Step 3 でまとめ直す。
 
 ### Step 3: 繰り返しを見る
 
 一般形が同じ指摘をまとめる。**別々の文書で 2 回以上** 現れたものだけを規範の候補にする。
 
-1 回きりのものは次回へ持ち越す。セッションログや crit の記録から拾った 1 回きりの指摘は、ログが消える前に
-inbox へ書いておく (形式は inbox と同じ)。inbox 由来のものはそのまま残る。
+数えるときは、前回から持ち越した候補 (`~/.claude/japanese-writer/retrospective/carryover.jsonl`) も足す。
+1 回きりのものは同じファイルへ持ち越す。セッションログは消えるので、元の指摘ではなく一般形と文書を残す。
+ファイルは Write で丸ごと書き直し、規範へ入れたものは外す。
+
+```json
+{"general": "結論より先に経緯を書いている", "fix": "結論を節の冒頭へ移し、経緯は後ろへ回す", "docs": ["docs/adr/0012-storage.md"]}
+```
 
 ### Step 4: 置き場を決める
 
