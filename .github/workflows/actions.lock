@@ -7,6 +7,9 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.2'
         - 'usadamasa/gh-manage@main'
+    '.github/workflows/nix-cache.yaml':
+        - 'actions/checkout@v7.0.1'
+        - 'usadamasa/gh-manage@main'
     '.github/workflows/tagpr.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -49,7 +52,7 @@ dependencies:
         repo_id: 524603982
     'usadamasa/gh-manage@main':
         ref: 'main'
-        commit: 'sha1-e14bcdd4429a5a58d3957e8fdee8499a179c8fec'
+        commit: 'sha1-320b95a4d83736e13c1a033a9760862881a9cb55'
         owner_id: 513226
         repo_id: 1390013800
         uses:
