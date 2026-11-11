@@ -176,7 +176,7 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 
 say "writing-gate をビルドします: $GATE"
 if ! go build -C "$ROOT" -o "$WORK_DIR/" ./...; then
-  die "go build に失敗しました｡上の出力を確認してください (go.mod の要求より古い Go だと、toolchain の取得に network が要ります)"
+  die "go build に失敗しました｡上の出力を確認してください (go.mod の go 行より古い Go だと、GOTOOLCHAIN=auto なら toolchain の取得に network が要り、GOTOOLCHAIN=local なら失敗します)"
 fi
 [ -x "$WORK_DIR/writing-gate" ] || die "ビルドは成功しましたが writing-gate がありません"
 
