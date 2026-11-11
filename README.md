@@ -124,7 +124,7 @@ plugin を使うだけなら「前提」節のツールで足りる。このリ�
 `go.mod` の `go` ディレクティブは devShell の `go_1_27` と系列を揃え、`GOTOOLCHAIN=local` でずれたら失敗させる。
 `go` 行は利用者の手元で SessionStart hook がビルドするときの下限も兼ねるので、セキュリティ修正のバージョンに合わせる。
 ツールのバージョンを上げるときは `nix flake update` で `flake.lock` を更新する。
-Go は nixpkgs のバージョンが修正バージョンに届かない間、`flake.nix` の `devGo` がソースを差し替え、
+Go は nixpkgs のバージョンが修正バージョンに届かない間、`flake.nix` の `devGo` が go.dev の配布バイナリへ差し替え、
 jv も同じ Go でビルドする。
 
 CI と同じ確認は task で手元でも通せる。
