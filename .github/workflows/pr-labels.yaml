@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# PR が閉じる issue の種類と area のラベルを PR へ写す。本体は gh-manage の reusable workflow
+name: pr-labels
+
+"on":
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  sync:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+    uses: usadamasa/gh-manage/.github/workflows/sync-pr-labels.yaml@main

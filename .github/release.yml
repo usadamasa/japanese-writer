@@ -1,4 +1,28 @@
+# tagpr の Release PR の本文と GitHub Release の note を、PR の種類のラベルで分ける。
+# PR のラベルは pr-labels workflow が closing issue から写す。1 つの PR は上から最初に当たった category に入る
 changelog:
   exclude:
     labels:
       - tagpr
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: Refactoring
+      labels:
+        - refactor
+        - investigation
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies
+      labels:
+        - dependencies
+        - github_actions
+        - nix
+    - title: Other
+      labels:
+        - "*"
