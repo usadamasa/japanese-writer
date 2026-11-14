@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026.1114.0](https://github.com/usadamasa/japanese-writer/compare/2026.1107.0...2026.1114.0) - 2026-11-14
+
+- chore(deps): Bump nixpkgs from `3ec6363` to `1c89083` by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/108
+- Go を 1.27.4 に上げる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/115
+- devGo を go.dev の配布バイナリの derivation へ替える by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/125
+- CI の nix store の cache を main で作る by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/126
+- prh-prose に「葉」の直訳語ルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/127
+- SessionStart の writing-gate ビルドに GOTOOLCHAIN=auto を渡し、失敗時に建て直すコマンドを出す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/128
+
 ## [2026.1107.0](https://github.com/usadamasa/japanese-writer/compare/2026.1103.0...2026.1107.0) - 2026-11-07
 
 - writing-gate: in-progress-note に進行状況注記の別表層形を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/106
