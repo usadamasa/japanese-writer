@@ -47,3 +47,14 @@ session_start_input() {
   [[ "$msg" == *"go.mod requires go >= 9.9"* ]]
   [[ "$msg" == *"/japanese-writer:setup"* ]]
 }
+
+@test "go build が失敗したら systemMessage に go の原因の行と ! 前置の建て直すコマンドを載せる" {
+  printf '#!/bin/bash\nprintf "go: download go1.99.0 for darwin/arm64: toolchain not available\\n" >&2\nexit 1\n' >"$MOCK_PATH/go"
+  chmod +x "$MOCK_PATH/go"
+
+  run_hook "$SCRIPT_PATH" <<< "$(session_start_input)"
+  [ "$status" -eq 0 ]
+  msg=$(jq -r '.systemMessage' <<< "$output")
+  [[ "$msg" == *"toolchain not available"* ]]
+  [[ "$msg" == *"! CLAUDE_PLUGIN_DATA=\"$DATA\" \"$ROOT/scripts/setup.sh\""* ]]
+}

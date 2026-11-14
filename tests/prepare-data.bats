@@ -80,6 +80,24 @@ teardown() {
   [[ "$output" == *"go.mod requires go >= 9.9"* ]]
 }
 
+# 起動したリポジトリの devShell が付けた GOTOOLCHAIN=local を go build に持ち込まない。
+# PATH の go が go.mod より古ければ、go が要るバージョンの toolchain を取りに行けるようにする
+@test "呼び出し元が GOTOOLCHAIN=local でも go build には GOTOOLCHAIN=auto を渡す" {
+  GOTOOLCHAIN=local run "$SCRIPT_PATH"
+  [ "$status" -eq 0 ]
+  [ "$(cat "$WORKDIR/go-env.log")" = "auto" ]
+}
+
+@test "go build が失敗したら go の原因の行と、data を渡す ! 前置の建て直すコマンドを出す" {
+  printf '#!/bin/bash\nprintf "go: download go1.99.0 for darwin/arm64: toolchain not available\\n" >&2\nexit 1\n' >"$MOCK_PATH/go"
+  chmod +x "$MOCK_PATH/go"
+
+  run "$SCRIPT_PATH" --if-stale
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"go: download go1.99.0 for darwin/arm64: toolchain not available"* ]]
+  [[ "$output" == *"! CLAUDE_PLUGIN_DATA=\"$DATA\" \"$ROOT/scripts/setup.sh\""* ]]
+}
+
 @test "ビルドしたバイナリが既知の漏出パターンを拾えなければ exit 1 し、既存のバイナリを残す" {
   run "$SCRIPT_PATH"
   [ "$status" -eq 0 ]

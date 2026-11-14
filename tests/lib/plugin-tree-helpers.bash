@@ -61,7 +61,7 @@ mock_cmd() {
 
 # mock_go [ERRORS] -> `go build -C ROOT -o OUT ./...` を受け、OUT/writing-gate に
 # scan の結果として errors=ERRORS の固定 JSON を返す偽バイナリを置く。OUT が相対なら ROOT から解決する。
-# 呼び出しは go.log に記録する。
+# 呼び出しは go.log に、受け取った GOTOOLCHAIN (未設定なら <unset>) は go-env.log に記録する。
 # shellcheck disable=SC2016 # 生成するスクリプトの中で展開させるため、$ はそのまま書き出す
 mock_go() {
   local errors="${1:-1}"
@@ -72,6 +72,7 @@ mock_go() {
   {
     printf '#!/bin/bash\n'
     printf 'printf "%%s\\n" "$*" >>"%s/go.log"\n' "$WORKDIR"
+    printf 'printf "%%s\\n" "${GOTOOLCHAIN-<unset>}" >>"%s/go-env.log"\n' "$WORKDIR"
     printf 'root=""; out=""\n'
     printf 'while [ "$#" -gt 0 ]; do\n'
     printf '  case "$1" in\n'

@@ -42,7 +42,7 @@ CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" "${CLAUDE_PLUGIN_ROOT}/scripts/setup.
 | ---- | ---- | ---- |
 | `前提コマンドが不足しています` | go / npx / jq のどれかが PATH に無い | 足りないコマンド名と用途 (出力にある) をそのまま伝える。インストールは利用者の環境の話なので、代わりに入れない |
 | `へ書き込めません` | sandbox が data ディレクトリか `~/.crit` への書き込みを拒んだ | 出力にある `! CLAUDE_PLUGIN_DATA=… "…/scripts/setup.sh"` の行をそのまま示し、Claude Code のプロンプトに入力すると sandbox の外で実行できると伝える。`dangerouslyDisableSandbox` では回避しない。利用者が `!` で実行しても同じ文言なら、そのディレクトリの所有者と権限の問題として伝える |
-| `go build に失敗しました` | Go のビルドが落ちた | 直前に流れた go の出力を要約して伝える。go.mod の go 行より古い Go だと、toolchain の取得か `GOTOOLCHAIN=local` で落ちる |
+| `go build に失敗しました` | Go のビルドが落ちた | 直前に流れた go の出力を要約して伝える。toolchain を取れなかった (オフラインなど) なら、原因を取り除いてから出力にある `! CLAUDE_PLUGIN_DATA=… "…/scripts/setup.sh"` の行を打つよう案内する |
 | `既知の process-leak パターンを拾いません` | 埋め込みルールの破損 | plugin の版を伝え、plugin の不具合として報告するよう案内する。前回のバイナリは残っている |
 
 利用者が `!` で実行した後は、その出力を読んで Step 3 へ進む。
