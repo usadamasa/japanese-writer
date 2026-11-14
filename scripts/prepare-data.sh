@@ -174,9 +174,15 @@ mkdir -p "$BIN_DIR" "$DATA/tmp" || die "ディレクトリを作成できませ�
 WORK_DIR=$(mktemp -d "$DATA/tmp/build-XXXXXX") || die "一時ディレクトリを作成できません: $DATA/tmp"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
+# 起動したリポジトリの devShell が付けた GOTOOLCHAIN=local は、そのリポジトリの方針なので受け継がない。
+# PATH の go が go.mod より古ければ go が toolchain を取りに行く。hook は sandbox の外で動くので取得できる。
+# 置き場は sandbox から書けないので、建て直しは利用者が `!` で setup.sh を打つ。
 say "writing-gate をビルドします: $GATE"
-if ! go build -C "$ROOT" -o "$WORK_DIR/" ./...; then
-  die "go build に失敗しました｡上の出力を確認してください (go.mod の go 行より古い Go だと、GOTOOLCHAIN=auto なら toolchain の取得に network が要り、GOTOOLCHAIN=local なら失敗します)"
+if ! GOTOOLCHAIN=auto go build -C "$ROOT" -o "$WORK_DIR/" ./...; then
+  printf 'prepare-data: go build に失敗しました｡原因は上の go の出力にあります (toolchain を取れなかったなど)\n' >&2
+  printf 'prepare-data: 原因を取り除いたら、セッションを開き直さずに次のコマンドを Claude Code のプロンプトで打つと建て直せます:\n' >&2
+  printf '  ! CLAUDE_PLUGIN_DATA="%s" "%s"\n' "$DATA" "$ROOT/scripts/setup.sh" >&2
+  exit 1
 fi
 [ -x "$WORK_DIR/writing-gate" ] || die "ビルドは成功しましたが writing-gate がありません"
 

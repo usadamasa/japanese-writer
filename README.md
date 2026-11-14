@@ -51,9 +51,8 @@ writing-gate は文書全体の集計 (語尾の連続・文体の混在) と逐
 
 - Node.js (`npx`)。textlint は `npx` で都度取得するので、`node_modules` を用意する必要はない
 - `jq`
-- Go (writing-gate のビルドに使う)。PATH の `go` が `go.mod` の `go` 行 (1.27.4) より古いと、
-  `GOTOOLCHAIN` が既定の `auto` なら go がそのバージョンを取得してビルドし (初回はネットワークが要る)、
-  `GOTOOLCHAIN=local` ならビルドが失敗する
+- Go (writing-gate のビルドに使う)。PATH の `go` が `go.mod` の `go` 行 (1.27.4) より古ければ、セッションを開いたリポジトリの
+  `GOTOOLCHAIN` (devShell の `local` など) にかかわらず、要るバージョンの toolchain を取りに行く (初回はネットワークが要る)
 
 ## インストール
 
@@ -81,6 +80,18 @@ cksum を前回と比べ、変わったときだけビルドし直す。update �
 ```text
 /japanese-writer:setup
 ```
+
+#### セッションを開き直さずに建て直す
+
+toolchain を取れなかった (オフラインなど) ときは、開始時のメッセージに go の出力と建て直すコマンドが出る。
+原因を取り除いてから、そのコマンドを Claude Code のプロンプトで打つ。data ディレクトリは sandbox から書けないため、
+`!` を付けて sandbox の外で動かす。
+
+```bash
+! CLAUDE_PLUGIN_DATA="<data ディレクトリ>" "<plugin の置き場>/scripts/setup.sh"
+```
+
+パスはメッセージに出るものをそのまま使う。成功すると Stop hook の点検がそのセッションから効く。
 
 ### crit との連動 (任意)
 
