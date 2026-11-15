@@ -96,6 +96,10 @@ func TestPhraseRuleMatches(t *testing.T) {
 		{"日付時点でのの否定述語を拾う", "in-progress-note", "2026-11-04 時点で対象リポジトリには自動更新ツールを導入しておらず、更新は手動の Pull Request で行う｡", true},
 		{"している途中での注記を拾う", "in-progress-note", "更新 Pull Request を自動で出す仕組みは整備している途中で、手動運用が続いている｡", true},
 		{"現時点ではだけで否定述語が無ければ拾わない", "in-progress-note", "現時点ではこの設計が正しい｡", false},
+		{"移行元の無い移行中の注記を拾う", "in-progress-note", "設定は移行中で、新しい形式の項目と古い形式の項目が混ざる｡", true},
+		{"まだ入っていないものがあるという注記を拾う", "in-progress-note", "まだ入っていない plugin がある｡", true},
+		{"移行中の挙動の説明は拾わない", "in-progress-note", "移行中でも読み込みは止まらない｡", false},
+		{"まだの否定に条件が続く文は拾わない", "in-progress-note", "まだ使っていない変数があると lint が落ちる｡", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
