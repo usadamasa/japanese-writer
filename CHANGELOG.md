@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.1115.0](https://github.com/usadamasa/japanese-writer/compare/2026.1114.0...2026.1115.0) - 2026-11-15
+
+### Features
+- closing issue のラベルを PR へ写し、release note を種類別の節に分ける by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/129
+- in-progress-note が移行元の無い移行中の注記を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/131
+- 欠陥と目的を一意に読める述語で書く規範を足す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/132
+
 ## [2026.1114.0](https://github.com/usadamasa/japanese-writer/compare/2026.1107.0...2026.1114.0) - 2026-11-14
 
 - chore(deps): Bump nixpkgs from `3ec6363` to `1c89083` by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/108
