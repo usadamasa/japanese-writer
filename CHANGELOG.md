@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1119.0](https://github.com/usadamasa/japanese-writer/compare/2026.1115.0...2026.1119.0) - 2026-11-19
+
+### Other
+- prh-prose に「段」の曖昧な区切りルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/135
+- prh-prose の『段』『前景』ルールへ言い回しの検出形を追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/138
+
 ## [2026.1115.0](https://github.com/usadamasa/japanese-writer/compare/2026.1114.0...2026.1115.0) - 2026-11-15
 
 ### Features
