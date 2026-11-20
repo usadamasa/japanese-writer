@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1120.0](https://github.com/usadamasa/japanese-writer/compare/2026.1119.0...2026.1120.0) - 2026-11-20
+
+### Other
+- prh-prose に範囲の限界を否定節だけで定義する言い回しのルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/139
+- prh-prose に観測対象への「頼る」の曖昧な用法を検出するルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/141
+
 ## [2026.1119.0](https://github.com/usadamasa/japanese-writer/compare/2026.1115.0...2026.1119.0) - 2026-11-19
 
 ### Other
