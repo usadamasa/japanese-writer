@@ -45,7 +45,6 @@ inbox・持ち越しの候補・前回の実行時刻は、端末ローカルの
 | inbox | `<state>/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘。1 ファイル 1 レビュー分。形式は [[writing-feedback]] が決める |
 | crit のコメント | セッションログ (`~/.claude/projects/*/*.jsonl`) と crit の記録 (`~/.crit` 配下の `review.json`) | 同梱のフィルタで機械的に取り出す (Step 1)。crit の記録は approve 後に消えるものが多く、コメントの大半はセッションログに残った approve 後 prompt から取れる |
 | 会話での訂正 | セッションログ | crit を通さずに文章を直させた発言。dream harvest を索引にして、文章を扱ったセッションだけを開く (Step 1) |
-| PR | ルールを持つリポジトリ (本 plugin) の merged PR | writing-feedback の PR 本文の「残した課題」に、登録を見送った構成の指摘が要約で残る |
 
 ## 手順
 
@@ -89,9 +88,6 @@ jq -c --arg since "<last_run>" '
 ```
 
 harvest が無い環境では、会話での訂正は inbox に書かれた分だけを読む。
-
-PR は `gh pr list --state merged --search "merged:>=<last_run の日付>" --json number,title,body` で取り、
-「残した課題」の節だけを読む。
 
 ### Step 2: 分ける
 
@@ -141,8 +137,8 @@ Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせ�
 | 設計文書の図・択一案の並置・意思決定の軸・未決事項 | `japanese-tech-writing/references/design-doc-scaffolding.md` |
 | 長文の緊張と回収、文のビート | `japanese-tech-writing/references/cognitive-rhythm.md` |
 | 制作過程や却下案の痕跡 | [[sanitize-artifacts]] |
-| 書き手個人の好み (語尾・句読点・絵文字の指紋) | 書き手の文体 skill。plugin の外なので、報告に挙げてユーザーへ渡す |
-| ドメインの用語・事実 | domain_check の skill。同じく報告に挙げる |
+| 書き手個人の好み (語尾・句読点・絵文字の指紋) | 書き手の文体 skill。plugin の外なので、Step 6 でユーザーへ渡す |
+| ドメインの用語・事実 | domain_check の skill。同じく Step 6 で渡す |
 
 ### Step 5: 規範を書く
 
@@ -156,8 +152,9 @@ Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせ�
 ### Step 6: 記録して閉じる
 
 1. 規範 1 つにつき 1 commit にする。commit message に一般形と、何件の別文書から来たかを書く。
-2. Draft PR を作る。本文の「残した課題」に、持ち越した候補の一般形と、plugin の外へ渡した指摘を書く。
-3. `<state>/state.json` の `last_run` を、Step 1 を始めた時刻 (ISO 8601) で書き直す。
+2. plugin の外へ渡す指摘 (Step 4) を報告に挙げてユーザーへ渡す。渡し方の決めごとがユーザーの指示にあれば、そちらに従う。
+3. Draft PR を作る。
+4. `<state>/state.json` の `last_run` を、Step 1 を始めた時刻 (ISO 8601) で書き直す。
 
 ```json
 {"last_run": "2026-11-07T15:00:00+09:00"}
