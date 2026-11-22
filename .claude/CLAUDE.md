@@ -31,7 +31,7 @@ writing-feedback skill が書き込む retrospective の inbox を指す。
 │    ├─ crit の approve 後の prompt (crit/on_finish_approved.md) からも呼ばれる
 │    └─ 構成・文脈の指摘は inbox へ書くだけにする
 ├─ /japanese-writer:writing-retrospective ── 思い出したとき、dream を回すとき
-│    └─ inbox・crit の記録・PR・セッションログを棚卸しして japanese-tech-writing の規範へ入れる
+│    └─ inbox・crit の記録・セッションログを棚卸しして japanese-tech-writing の規範へ入れる
 ├─ /japanese-writer:gate-off, gate-on ── このセッションの間だけ Stop hook の点検を止める・戻す
 ├─ (自動) SessionStart hook: writing-gate を data ディレクトリへビルド ── セッションを開くとき
 └─ (自動) Stop hook: writing-gate ── セッションを閉じるとき
