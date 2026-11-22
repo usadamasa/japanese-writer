@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.1122.0](https://github.com/usadamasa/japanese-writer/compare/2026.1120.0...2026.1122.0) - 2026-11-22
+
+### Features
+- prh-prose で名詞の「直し」、作業を「流す」、区分名の「形」「枠」「欄」を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/142
+- prh-prose で画面の部品を指す「窓」を拾う by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/144
+
 ## [2026.1120.0](https://github.com/usadamasa/japanese-writer/compare/2026.1119.0...2026.1120.0) - 2026-11-20
 
 ### Other
