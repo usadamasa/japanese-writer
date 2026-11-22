@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.1122.1](https://github.com/usadamasa/japanese-writer/compare/2026.1122.0...2026.1122.1) - 2026-11-22
+
+### Features
+- writing-retrospective が PR 本文の「残した課題」に頼らず棚卸しする by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/148
+### Other
+- AGENTS.md と README を .claude/CLAUDE.md へまとめる by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/145
+
 ## [2026.1122.0](https://github.com/usadamasa/japanese-writer/compare/2026.1120.0...2026.1122.0) - 2026-11-22
 
 ### Features
