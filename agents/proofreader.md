@@ -153,7 +153,7 @@ medium に応じて `Skill` で `japanese-writer:japanese-tech-writing` を読�
   - 動作の主体の取り違え (Phase 2.4)、表や箇条書きに性質の違う項目が混ざる・並び順が揃わない (Phase 2.8)、
     他の文書への言及がリンクになっていない (Phase 2.10)、他の文書から書き写した内容 (Phase 2.13) → Tier 3
   - 設計文書の骨格 (`references/design-doc-scaffolding.md` の 5〜7 節): 決定の状態と記述の不一致、
-    仕様書に約束していない事項、関係を文章だけで説明している・図の区別が揃わない → Tier 3
+    仕様が保証しない事項を仕様書に書いている、関係を文章だけで説明している・図の区別が揃わない → Tier 3
 - **Phase 3 self-check 項目** (網羅視点での再スキャン):
   - 段落先頭文だけで論証が追えるか (Phase 3.1 項目4) → Tier 3
   - 論証の一方向性 (Phase 3.1 項目5、 Phase 2.3 と重複) → Tier 3
