@@ -70,7 +70,7 @@ CI と同じ確認は task で手元でも通せる。
 
 ## issue と PR のラベル
 
-種類・優先度・epic の付け方は `labeling-github-issues` skill に従う。機能の area はこの表から選ぶ。
+種類・優先度・epic の付け方は `github-ops:labeling-github-issues` skill に従う。機能の area はこの表から選ぶ。
 
 | area | 含むもの |
 | ---- | ---- |
@@ -85,4 +85,4 @@ CI と同じ確認は task で手元でも通せる。
 移設を取りやめた agy-delegation (#19) には area を付けない。
 
 - PR の本文に、閉じる issue を `Closes #N` で 1 行ずつ書く。pr-labels workflow (gh-manage の reusable workflow の呼び出し) が issue の種類と area のラベルを PR へ写す。
-- issue を閉じない PR は、`gh pr create --label` で種類と area のラベルを付けて作る。選び方は `labeling-github-issues` skill。
+- issue を閉じない PR は、`gh pr create --label` で種類と area のラベルを付けて作る。選び方は `github-ops:labeling-github-issues` skill。
