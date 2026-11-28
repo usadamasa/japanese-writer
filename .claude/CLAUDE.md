@@ -13,7 +13,9 @@ writing-feedback skill が書き込む retrospective の inbox を指す。
 ## 構成
 
 入口は 2 つ。書くときは `japanese-tech-writing` が構成から推敲まで導き、書き上がったら
-`/japanese-writer:proofread` で添削する。各部品の役割は、それぞれの SKILL.md と agent の定義にある。
+`/japanese-writer:proofread` で添削する。
+Product Brief は writing-product-briefs から入り、文章は japanese-tech-writing と proofread に従う。
+各部品の役割は、それぞれの SKILL.md と agent の定義にある。
 
 ```text
 ユーザー
