@@ -19,8 +19,9 @@ writing-feedback skill が書き込む retrospective の inbox を指す。
 ユーザー
 ├─ /japanese-writer:setup ── 自動の準備が失敗したとき、crit をリンクするとき
 ├─ 書く ── japanese-tech-writing (Phase 1 構成 → 2 執筆 → 3 推敲)
-│             ├─ Product Brief は writing-product-briefs が項目の型と点検の観点を足す
 │             └─ Phase 3 の最後に proofread を呼ぶ
+├─ Product Brief を書く・点検する ── writing-product-briefs (項目の型と点検の観点)
+│    └─ 文章は japanese-tech-writing に従い、共有する前に proofread を呼ぶ
 ├─ /japanese-writer:proofread ── 添削の入口
 │    ├─ textlint-check (機械点検と autofix)
 │    └─ proofreader (subagent)
