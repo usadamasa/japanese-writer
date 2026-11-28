@@ -71,7 +71,7 @@ func TestEditedMarkdown(t *testing.T) {
 }
 
 // userLine は文字列本文のユーザー発言 1 件の transcript 行を作る｡
-// ユーザーが打った slash command はこの形で残る｡
+// ユーザーが入力した slash command はこの形で残る｡
 func userLine(t *testing.T, content string, meta bool) string {
 	t.Helper()
 	raw, err := json.Marshal(map[string]any{
@@ -122,26 +122,26 @@ func TestReadTranscriptGateOff(t *testing.T) {
 		return tr
 	}
 
-	t.Run("何も打っていなければ有効", func(t *testing.T) {
+	t.Run("何も入力していなければ有効", func(t *testing.T) {
 		if tr := read(t, "none.jsonl", toolUseLine("Write", "/repo/a.md")); tr.GateOff {
 			t.Error("GateOff = true, want false")
 		}
 	})
 
-	t.Run("ユーザーが gate-off を打てば止まる", func(t *testing.T) {
+	t.Run("ユーザーが gate-off を入力すれば止まる", func(t *testing.T) {
 		if tr := read(t, "off.jsonl", userLine(t, gateOffCommand, false)); !tr.GateOff {
 			t.Error("GateOff = false, want true")
 		}
 	})
 
-	t.Run("後に gate-on を打てば戻る", func(t *testing.T) {
+	t.Run("後に gate-on を入力すれば戻る", func(t *testing.T) {
 		tr := read(t, "on.jsonl", userLine(t, gateOffCommand, false), userLine(t, gateOnCommand, false))
 		if tr.GateOff {
 			t.Error("GateOff = true, want false")
 		}
 	})
 
-	t.Run("gate-on の後にまた gate-off を打てば止まる", func(t *testing.T) {
+	t.Run("gate-on の後にまた gate-off を入力すれば止まる", func(t *testing.T) {
 		tr := read(t, "off-again.jsonl",
 			userLine(t, gateOffCommand, false), userLine(t, gateOnCommand, false), userLine(t, gateOffCommand, false))
 		if !tr.GateOff {
@@ -576,7 +576,7 @@ func TestRunGate(t *testing.T) {
 		}
 	})
 
-	t.Run("ユーザーが gate-off を打っていれば block しない", func(t *testing.T) {
+	t.Run("ユーザーが gate-off を入力していれば block しない", func(t *testing.T) {
 		bad := writeTestFile(t, dir, "off.md", "ご指示のとおり、設定を分割した｡\n")
 		transcript := writeTestFile(t, dir, "off.jsonl",
 			userLine(t, gateOffCommand, false)+"\n"+toolUseLine("Write", bad)+"\n")
@@ -585,7 +585,7 @@ func TestRunGate(t *testing.T) {
 		}
 	})
 
-	t.Run("gate-on を打ち直していれば block する", func(t *testing.T) {
+	t.Run("gate-on を入力し直していれば block する", func(t *testing.T) {
 		bad := writeTestFile(t, dir, "on.md", "ご指示のとおり、設定を分割した｡\n")
 		transcript := writeTestFile(t, dir, "on.jsonl",
 			userLine(t, gateOffCommand, false)+"\n"+toolUseLine("Write", bad)+"\n"+userLine(t, gateOnCommand, false)+"\n")

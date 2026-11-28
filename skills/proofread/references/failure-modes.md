@@ -76,7 +76,7 @@ npx / jq の不在、 config の不在、 config が参照する rule の解決�
 **親動作**: Tier 2 の適用を止め、 報告冒頭に `⚠ Tier 1 が異常規模 (X% 変更) 。 親で git diff 確認、 revert 推奨` と表示。 Tier 2 は全件「未適用」に載せ、 ユーザーに git status / git diff 確認と revert 判断を委ねる。 異常規模の上に Tier 2 を重ねると、 revert で戻す範囲が判別できなくなる。
 
 **ユーザー指示**: `git diff -- {file_path}` で確認後、 必要なら `git restore -- {file_path}` で revert。
-どちらも cwd が {repo} のセッションで打つ。
+どちらも cwd が {repo} のセッションで実行する。
 
 ## 横断ルール
 

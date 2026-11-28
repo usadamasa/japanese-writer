@@ -56,7 +56,7 @@ func usage() {
       transcript から今セッションで編集された .md を拾って点検し、
       severity=error が残っていれば Stop hook 用の block JSON を stdout へ出す｡
       前回の block に載せた指摘は出さない｡ユーザーが /japanese-writer:gate-off を
-      打っていれば点検しない｡
+      入力していれば点検しない｡
 `)
 }
 

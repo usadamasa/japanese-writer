@@ -15,7 +15,7 @@ set -euo pipefail
 # Bash tool には渡らないので、SKILL.md が置換した値を前置きして呼ぶ。
 #
 # Claude Code の sandbox は ~/.claude/plugins への書き込みを拒む。go を起動する前に
-# data の bin/ へ書けるかを確かめ、書けなければ sandbox の外で打つコマンド (`!` 前置) を案内する。
+# data の bin/ へ書けるかを確かめ、書けなければ sandbox の外で実行するコマンド (`!` 前置) を案内する。
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_PATH="$SCRIPT_DIR/$(basename "${BASH_SOURCE[0]}")"
@@ -137,7 +137,7 @@ fi
 # ---------------------------------------------------------------------------
 # die_unwritable PATH ERR -> 書き込み拒否の案内を出して exit 1 する。
 # Claude Code の Bash から呼ばれたときは sandbox が原因のことが多いので、sandbox の外で
-# 同じ引数で打ち直すコマンドを示す。`!` でも同じなら権限そのものの問題になる。
+# 同じ引数で実行し直すコマンドを示す。`!` でも同じなら権限そのものの問題になる。
 die_unwritable() {
   local rerun_args=""
   [ "$LINK_CRIT" = true ] && rerun_args=" --crit"

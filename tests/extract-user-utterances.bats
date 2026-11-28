@@ -39,7 +39,7 @@ setup() {
   [ "$(jq -r '.text' <<< "$output")" = "結論を先に書いて" ]
 }
 
-@test "利用者が japanese-writer の slash command を打ったセッションも対象にする" {
+@test "利用者が japanese-writer の slash command を入力したセッションも対象にする" {
   command='{"type":"user","sessionId":"s1","timestamp":"2026-11-01T00:04:00Z","message":{"role":"user","content":"<command-name>/japanese-writer:proofread</command-name>"}}'
   run -0 jq -s -c -f "$FILTER" <<< "$(printf '%s\n' "$USER_SAYS" "$command")"
   [ "$(jq -sr 'map(.text) | first' <<< "$output")" = "結論を先に書いて" ]

@@ -6,7 +6,7 @@
 
 ## インストール
 
-前提は Node.js (`npx`)、`jq`、Go。install の後に手で打つものは無い。
+前提は Node.js (`npx`)、`jq`、Go。install の後に手で実行するコマンドは無い。
 
 構成と開発の手順は [.claude/CLAUDE.md](.claude/CLAUDE.md) にある。
 
