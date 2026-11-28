@@ -2,7 +2,7 @@
 name: gate-on
 description: >-
   `/japanese-writer:gate-off` で止めた writing-gate (Stop hook の文章点検) をこのセッションで戻す。
-  ユーザーが `/japanese-writer:gate-on` で打つ。
+  ユーザーが `/japanese-writer:gate-on` を入力して呼ぶ。
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 ユーザーが writing-gate を戻した。次の Stop から、セッションを閉じるときの文章点検を再び行う。
 
-判定は writing-gate が transcript から行う。gate-off と gate-on のうち、後に打った方が効く。
+判定は writing-gate が transcript から行う。gate-off と gate-on のうち、後に入力した方が効く。
 
 ## すること
 

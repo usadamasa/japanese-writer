@@ -4,7 +4,7 @@ set -euo pipefail
 # SessionStart hook: plugin の data ディレクトリに writing-gate と crit の prompt を用意する。
 #
 # plugin を update すると置き場のディレクトリが版ごとに変わる。data は update をまたいで
-# 残るので、ここで入力の差分を見てビルドし直せば、利用者が setup を打ち直す必要がない。
+# 残るので、ここで入力の差分を見てビルドし直せば、利用者が setup を実行し直す必要がない。
 # hook は Bash tool の sandbox の外で動くため、~/.claude/plugins/data へ書ける。
 #
 # 成功時は何も出さない (SessionStart の stdout は会話の文脈へ足される)。

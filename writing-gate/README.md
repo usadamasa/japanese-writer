@@ -102,8 +102,8 @@ block の reason の各指摘には ID (`(wg:3f2a9c1e)` の形) を付ける。I
 
 ### セッションの間だけ止める
 
-ユーザーが `/japanese-writer:gate-off` を打つと、そのセッションの `gate` は点検せずに通す。
-`/japanese-writer:gate-on` で戻る。後に打った方が効く。
+ユーザーが `/japanese-writer:gate-off` を入力すると、そのセッションの `gate` は点検せずに通す。
+`/japanese-writer:gate-on` で戻る。後に入力した方が効く。
 
 状態はファイルにも設定にも持たず、その Stop が渡してきた transcript だけから読む。だから効くのは
 同じセッション (同じ transcript) の間だけで、セッションが変われば初期状態 (点検する) に戻る。
@@ -111,7 +111,7 @@ block の reason の各指摘には ID (`(wg:3f2a9c1e)` の形) を付ける。I
 無効化コメントと `exclude_extra` はファイル単位で恒久的に効くので、他人のファイルや共有のルールファイル
 には入れにくい。gate-off はファイルにも設定にも触れない。
 
-ユーザーが打った slash command は transcript の user エントリに `<command-name>` として残り、`gate` は
+ユーザーが入力した slash command は transcript の user エントリに `<command-name>` として残り、`gate` は
 それだけを読む。Claude が Skill ツールで同じ skill を呼んでも `tool_use` にしか残らないので効かない。
 止める判断をユーザーだけが持つようにするため。skill 側も `disable-model-invocation: true` で
 Claude からは呼べなくしてある。
@@ -226,7 +226,7 @@ SessionStart hook (hooks/session-start-prepare.sh)
 Stop hook (hooks/stop-writing-gate.sh)
   └─ ${CLAUDE_PLUGIN_DATA}/bin/writing-gate gate --transcript <path>
        ├─ transcript から Write/Edit/MultiEdit/NotebookEdit の .md、前回の block の指摘 ID、
-       │  ユーザーが打った gate-off / gate-on を拾う
+       │  ユーザーが入力した gate-off / gate-on を拾う
        ├─ gate-off が効いていれば点検せずに通す
        ├─ 除外と上限 (既定 20 件) を当てる
        ├─ 点検して、書いた行にかかる指摘だけを残し、前回に載せた指摘を外す

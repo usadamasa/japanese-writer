@@ -184,7 +184,7 @@ type Transcript struct {
 // エントリの形に頼らず ID の字面だけを見る｡
 var seenIDRe = regexp.MustCompile(`\(wg:([0-9a-f]{8})\)`)
 
-// ユーザーが slash command を打つと、user エントリの本文にこの形で残る｡
+// ユーザーが slash command を入力すると、user エントリの本文にこの形で残る｡
 // Claude が Skill ツールで呼んだときは tool_use にしか残らないので、ここには当たらない｡
 const (
 	gateOffCommandName = "/japanese-writer:gate-off"
@@ -293,7 +293,7 @@ func splitContent(raw json.RawMessage) (string, []contentBlock) {
 }
 
 // applyGateCommand はユーザーの発言に gate-off / gate-on があれば状態を更新する｡
-// 後に打った方が勝つ｡
+// 後に入力した方が勝つ｡
 func (t *Transcript) applyGateCommand(text string) {
 	off := strings.LastIndex(text, gateOffMarker)
 	on := strings.LastIndex(text, gateOnMarker)
@@ -461,7 +461,7 @@ func buildReason(findings []prose.Finding, skipped []string) string {
 		"該当ファイルの先頭に無効化コメントを置くか ~/.claude/writing-gate.json の exclude_extra に足す｡\n")
 	fmt.Fprintf(&b, "無効化コメントの書式: <!-- writing-gate-disable %s -->"+
 		" (ルール ID を省くと全ルールが無効になる)\n", strings.Join(errorRuleIDs(findings), " "))
-	fmt.Fprintf(&b, "このセッションの間だけ点検を止めるには、ユーザーに %s を打ってもらう"+
+	fmt.Fprintf(&b, "このセッションの間だけ点検を止めるには、ユーザーに %s を入力してもらう"+
 		" (Claude が Skill ツールで呼んでも効かない)｡%s で戻る｡\n", gateOffCommandName, gateOnCommandName)
 	return b.String()
 }
