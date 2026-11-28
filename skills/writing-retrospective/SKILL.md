@@ -3,7 +3,7 @@ name: writing-retrospective
 description: >-
   過去の crit レビューや会話で受けた文章への指摘のうち、正規表現では拾えない構成・論証・文脈の指摘を
   棚卸しして、文章規範へ反映するときに使う。
-  「指摘を棚卸しして」「レビューの傾向を規範に入れて」と言われたとき、dream を回すときに使う。
+  「指摘を棚卸しして」「レビューの傾向を規範に入れて」と言われたとき、記憶の棚卸し (consolidation) を回すときに使う。
   語・句の言い回しを 1 件ずつルールにする作業は writing-feedback の担当。
 ---
 
@@ -17,10 +17,11 @@ description: >-
 ## いつ回すか
 
 - ユーザーが棚卸しを頼んだ
-- dream を回すとき (セッションの蓄積が同じ周期になる)
+- 記憶の棚卸し (consolidation) を回すとき (セッションの蓄積が同じ周期になる)
 - inbox のファイルが 10 件を超えた
-- 前回の `last_run` から 30 日が近い。セッションログは Claude Code の既定 (`cleanupPeriodDays`) で 30 日ほどで消え、
-  inbox に書かれていない指摘はそこで失われる
+- 前回の `last_run` から 30 日が近い。crit のコメントと会話での訂正はセッションログ (transcript) から採るが、
+  セッションログは Claude Code の保持期間 (`cleanupPeriodDays`、既定 30 日) を過ぎると消える。
+  inbox に書かれていない指摘はそこで失われるので、保持期間の内に回す
 
 ## 状態の置き場
 
@@ -44,7 +45,7 @@ inbox・持ち越しの候補・前回の実行時刻は、端末ローカルの
 |----|----|----|
 | inbox | `<state>/inbox/*.md` | writing-feedback が見送った構造・文脈の指摘。1 ファイル 1 レビュー分。形式は [[writing-feedback]] が決める |
 | crit のコメント | セッションログ (`~/.claude/projects/*/*.jsonl`) と crit の記録 (`~/.crit` 配下の `review.json`) | 同梱のフィルタで機械的に取り出す (Step 1)。crit の記録は approve 後に消えるものが多く、コメントの大半はセッションログに残った approve 後 prompt から取れる |
-| 会話での訂正 | セッションログ | crit を通さずに文章を直させた発言。dream harvest を索引にして、文章を扱ったセッションだけを開く (Step 1) |
+| 会話での訂正 | セッションログ | crit を通さずに文章を直させた発言。同梱のフィルタで文章を扱ったセッションの発言を取り出す (Step 1) |
 
 ## 手順
 
@@ -74,26 +75,27 @@ jq -s -c --arg since "<last_run>" '
 `~/.crit` は `find` で辿らず `rg --files` で列挙する。書き手 (Claude) のコメントと、md 以外へのコメント
 (コードやその設計への意見が大半) は落とす。
 
-会話での訂正は、agents-daemon の dream harvest (`~/.local/state/agents-daemon/dream/harvest/*.jsonl`) を
-索引にする。harvest は 1 セッション 1 行で、`skills_invoked` に呼ばれた skill 名、`feedback_signals` に
-ユーザーの訂正の抜粋が入る。抜粋は 200 文字で切られているので、文章への指摘らしいものがあれば
-`session_id` の transcript を開いて前後を読む。
+会話での訂正は、セッションログから利用者の発言を取り出して集める。
+フィルタ (`${CLAUDE_SKILL_DIR}/extract-user-utterances.jq`) は transcript 1 本を `-s` で受け、
+.md を編集したか japanese-writer の skill を呼んだセッションに絞って、発言 1 件 1 行の JSON
+(`session_id`、`timestamp`、`text`) を出す。訂正かどうかはここでは決めず、Step 2 の subagent が判定する。
 
 ```bash
-jq -c --arg since "<last_run>" '
-  select(.ts_end > $since)
-  | select(.skills_invoked | any(test("proofread|japanese-tech-writing|writing-style|writing-feedback")))
-  | {session_id, signals: [.feedback_signals[]?.quote]} | select(.signals | length > 0)' \
-  ~/.local/state/agents-daemon/dream/harvest/*.jsonl > ./tmp/retrospective/conversation.jsonl
+rg --files -0 --glob '*.jsonl' --max-depth 2 ~/.claude/projects \
+  | xargs -0 -n 1 jq -s -c -f "${CLAUDE_SKILL_DIR}/extract-user-utterances.jq" > ./tmp/retrospective/utterances-all.jsonl
+jq -c --arg since "<last_run>" 'select($since == "" or (.timestamp // "") > $since)' \
+  ./tmp/retrospective/utterances-all.jsonl > ./tmp/retrospective/conversation.jsonl
 ```
 
-harvest が無い環境では、会話での訂正は inbox に書かれた分だけを読む。
+`--max-depth 2` で subagent の transcript (`<project>/<session>/subagents/`) を外す。利用者の発言は親のセッションにだけ残る。
 
 ### Step 2: 分ける
 
 Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせる。crit のコメントは 200 件程度ずつに
 `split -l` で割り、割った数だけ subagent を並べて起動する。各 subagent は 1 件ずつ次の区分に分け、
 `./tmp/retrospective/classified-<n>.jsonl` へ書く。
+会話の発言 (`conversation.jsonl`) も同じく割って渡す。発言の大半は作業の依頼なので、文章への訂正かを先に判定させ、
+訂正でないものは作業の指示として捨てさせる。前後を読まないと判定できない発言は、`session_id` の transcript を開かせる。
 
 | 区分 | 判定 | 行き先 |
 |----|----|----|
@@ -170,4 +172,3 @@ Step 1 の出力と inbox を、`model: "sonnet"` の subagent に分けさせ�
 | [[japanese-tech-writing]] | 規範の本体。本スキルはそこへ書き足す |
 | [[proofread]] | 文書 1 本の添削。proofreader は規範を読むので、規範へ入れた観点は次の添削から効く |
 | [[sanitize-artifacts]] | 漏出の型の正本 |
-| dream (agents-daemon) | 記憶階層の consolidation。harvest を本スキルの索引に使う |
