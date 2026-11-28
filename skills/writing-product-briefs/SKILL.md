@@ -107,8 +107,8 @@ Brief を書かないと決めたのに、文書を残すことを求められ�
 
 ### 6. 文章を仕上げる
 
-- 本文の構成と段落は japanese-writer:japanese-tech-writing skill に従う (必須)。
-- 関係者へ共有する前に japanese-writer:proofread skill を通す (必須)。
+- 本文の構成と段落は [[japanese-tech-writing]] に従う (必須)。
+- 関係者へ共有する前に [[proofread]] を通す (必須)。
 
 ### 7. 調査の結果で更新する
 
@@ -143,5 +143,8 @@ Brief を書かないと決めたのに、文書を残すことを求められ�
 - **1〜2 ページに収める理由:** 関係者 (エンジニアリング、デザイン、GTM) が読み切って判断できる長さにする。
   長くなったら仕様が入り込んでいる。
 - **見出しを残す理由:** 埋まらない項目の見出しを消すと、分かっていないことが読み手から見えなくなる。
-- **出典:** 構成要素と書き方の手順は Productboard の用語集
-  [Product Brief](https://www.productboard.com/glossary/product-brief/) を元にしている。
+
+## 出典
+
+Productboard の用語集 <https://www.productboard.com/glossary/product-brief/> を翻案した。
+Brief の構成要素と、書き方の手順は原典に従う。

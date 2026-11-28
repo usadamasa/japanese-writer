@@ -19,6 +19,7 @@ writing-feedback skill が書き込む retrospective の inbox を指す。
 ユーザー
 ├─ /japanese-writer:setup ── 自動の準備が失敗したとき、crit をリンクするとき
 ├─ 書く ── japanese-tech-writing (Phase 1 構成 → 2 執筆 → 3 推敲)
+│             ├─ Product Brief は writing-product-briefs が項目の型と点検の観点を足す
 │             └─ Phase 3 の最後に proofread を呼ぶ
 ├─ /japanese-writer:proofread ── 添削の入口
 │    ├─ textlint-check (機械点検と autofix)
@@ -77,7 +78,7 @@ CI と同じ確認は task で手元でも通せる。
 | `area: writing-gate` | Stop hook の writing-gate (Go の CLI、phrase rule、gate-off / gate-on) |
 | `area: textlint` | textlint-check と同梱の textlint config、prh のルール |
 | `area: proofread` | proofread skill、proofreader subagent、sanitize-artifacts |
-| `area: tech-writing` | japanese-tech-writing の文章規範 |
+| `area: tech-writing` | japanese-tech-writing の文章規範、writing-product-briefs |
 | `area: feedback` | writing-feedback、writing-retrospective、crit の approve 後の prompt |
 | `area: setup` | setup skill、SessionStart hook による writing-gate のビルドと data ディレクトリの準備 |
 | `area: dev` | CI、lint、テスト、Taskfile、flake、保守用の skill と docs |
