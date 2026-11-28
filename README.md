@@ -6,10 +6,7 @@
 
 ## インストール
 
-```text
-/plugin marketplace add usadamasa/agents-marketplace
-/plugin install japanese-writer@usadamasa
-```
+導入は [agents-marketplace の README](https://github.com/usadamasa/agents-marketplace/blob/main/README.md) の手順に従う。
 
 前提は Node.js (`npx`)、`jq`、Go。install の後に手で打つものは無い。
 
