@@ -1,5 +1,27 @@
 # Changelog
 
+## [2026.1128.0](https://github.com/usadamasa/japanese-writer/compare/2026.1122.1...2026.1128.0) - 2026-11-28
+
+### Features
+- prh-prose に比喩的な言い回しの検出を 4 件追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/151
+- prh-prose に「残す」の継続動詞としての誤用を検出するルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/152
+- prh-prose に「約束」「運ぶ」の比喩としての誤用を検出するルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/155
+- コマンドを「打つ」と書く文を prh で検出し、既存の箇所を言い換える by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/164
+- feat: agents-config の writing-product-briefs skill を移す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/165
+### Refactoring
+- 配る部分から agents-daemon の名指しを外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/163
+### Documentation
+- proofreader.md と tier-classification.md の「約束」誤検出を直す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/156
+- github-ops へ移した skill の参照を名前空間付きにする by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/158
+- README の導入手順を agents-marketplace の README へのリンクにする by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/160
+- README から agents-marketplace へのリンクを外す by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/161
+### Dependencies
+- chore(deps): Bump nixpkgs from `1c89083` to `2786a2a` by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/154
+- chore(deps): Bump actions/create-github-app-token from 3.3.0 to 3.4.0 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/153
+- chore(deps): Bump Songmu/tagpr from 1.21.4 to 1.22.0 by @dependabot[bot] in https://github.com/usadamasa/japanese-writer/pull/116
+### Other
+- writing-gate に参照後の重複言及を検出するルールを追加する by @usadamasa in https://github.com/usadamasa/japanese-writer/pull/149
+
 ## [2026.1122.1](https://github.com/usadamasa/japanese-writer/compare/2026.1122.0...2026.1122.1) - 2026-11-22
 
 ### Features
